@@ -72,6 +72,12 @@ shuffle_dynamic_array()
 	cpprelude::shuffle(array.begin(), array.count());
 	for(auto& n: array)
 		std::cout << n << " ";
+
+	std::cout << "\nsorted:\n";
+
+	cpprelude::insertion_sort(array.begin(), array.count());
+	for (auto& n : array)
+		std::cout << n << " ";
 }
 
 void
@@ -96,6 +102,13 @@ shuffle_dlinked_list()
 	cpprelude::shuffle(array.begin(), array.count());
 	for(auto& n: array)
 		std::cout << n << " ";
+
+	std::cout << "\nsorted:\n";
+
+	cpprelude::quick_sort(array.begin(), array.count());
+	for (auto& n : array)
+		std::cout << n << " ";
+
 }
 
 void
@@ -107,6 +120,18 @@ shuffle_test()
 	std::cout << std::endl;
 	shuffle_dlinked_list();
 	std::cout << std::endl;
+}
+
+void
+quick_select_test()
+{
+	cpprelude::dlinked_list<int> array;
+	for (int i = 0; i < 10; ++i)
+		array.insert_back(i);
+	
+	for (auto& n : array)
+		std::cout << n << " ";
+	std::cout << "\nquick_select(4): " << *quick_select(array.begin(), array.count(), 4) << std::endl;
 }
 
 void
@@ -124,6 +149,19 @@ scratch()
 	array.expand();
 	for(cpprelude::usize i = 16; i < 32; i++)
 		array[i] = i;
+
+	cpprelude::dlinked_list<int> arr;
+	arr.insert_back({0, 1, 2, 4, 3});
+
+	for(int i = 0; i < arr.count(); ++i)
+	{
+		auto result = cpprelude::quick_select(arr.begin(), arr.count(), i);
+		std::cout << "result("<<i<<") = " << *result << std::endl;
+		for(auto n: arr)
+			std::cout << n << ", ";
+		std::cout << "\n";
+		std::cout << "\n";
+	}
 }
 
 int
@@ -131,7 +169,8 @@ main(int argc, char** argv)
 {
 	std::cout << "Hello, World!" << std::endl;
 	benchmark();
-	//shuffle_test();
+	shuffle_test();
+	quick_select_test();
 	scratch();
 
 	return 0;

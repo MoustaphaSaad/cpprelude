@@ -23,19 +23,19 @@ TEST_CASE("merge_sort test", "[merge_sort]")
 
 		dynamic_array<usize> aux(arr);
 
-		CHECK(!cpprelude::is_sorted(aux.begin(), aux.end()));
+		CHECK(!cpprelude::is_sorted(aux.begin(), aux.count()));
 		cpprelude::_merge(arr.begin(), aux.begin(), 0, 4, 9);
-		CHECK(cpprelude::is_sorted(aux.begin(), aux.end()));
+		CHECK(cpprelude::is_sorted(aux.begin(), aux.count()));
 
-		CHECK(!cpprelude::is_sorted(arr.begin(), arr.end()));
+		CHECK(!cpprelude::is_sorted(arr.begin(), arr.count()));
 		merge_sort(arr.begin(),arr.count());
-		CHECK(cpprelude::is_sorted(arr.begin(), arr.end()));
+		CHECK(cpprelude::is_sorted(arr.begin(), arr.count()));
 				
 	}
 	
 	SECTION("Case 02") 
 	{
-		usize length = 10;
+		usize length = 128;
 		dynamic_array<usize> arr(length);
 
 		for (usize i = 0; i < length; i++)
@@ -43,14 +43,14 @@ TEST_CASE("merge_sort test", "[merge_sort]")
 			arr[i] = details::_get_random_index(length);
 		}
 		
-		CHECK(!cpprelude::is_sorted(arr.begin(), arr.end()));
+		CHECK(!cpprelude::is_sorted(arr.begin(), arr.count()));
 		merge_sort(arr.begin(), arr.count());
-		CHECK(cpprelude::is_sorted(arr.begin(), arr.end()));
+		CHECK(cpprelude::is_sorted(arr.begin(), arr.count()));
 	}
 
 	SECTION("Case 03")
 	{
-		usize length = 40;
+		usize length = 512;
 		dynamic_array<usize> arr(length);
 
 		for (usize i = 0; i < length; i++)
@@ -58,14 +58,14 @@ TEST_CASE("merge_sort test", "[merge_sort]")
 			arr[i] = details::_get_random_index(length);
 		}
 
-		CHECK(!cpprelude::is_sorted(arr.begin(), arr.end()));
+		CHECK(!cpprelude::is_sorted(arr.begin(), arr.count()));
 		merge_sort(arr.begin(), arr.count());
-		CHECK(cpprelude::is_sorted(arr.begin(), arr.end()));
+		CHECK(cpprelude::is_sorted(arr.begin(), arr.count()));
 	}
 
 	SECTION("Case 04")
 	{
-		usize length = 10;
+		usize length = 128;
 		dynamic_array<usize> arr(length);
 
 		for (usize i = 0; i < length; i++)
@@ -75,12 +75,12 @@ TEST_CASE("merge_sort test", "[merge_sort]")
 
 		//just playing with lamdas
 		std::function <bool (const usize& , const usize& )> fun = [](const usize& x, const usize& y){
-			return x < y;
+			return x > y;
 		};
 
-		CHECK(!cpprelude::is_sorted(arr.begin(), arr.end(), fun));
+		CHECK(!cpprelude::is_sorted(arr.begin(), arr.count(), fun));
 		merge_sort(arr.begin(), arr.count(), fun);
-		CHECK(cpprelude::is_sorted(arr.begin(), arr.end(), fun));
+		CHECK(cpprelude::is_sorted(arr.begin(), arr.count(), fun));
 	}
 	
 }

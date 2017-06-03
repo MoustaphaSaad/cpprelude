@@ -4,7 +4,7 @@
 
 using namespace cpprelude;
 
-TEST_CASE("quick_sort test", "[quick_sort]")
+TEST_CASE("insertion_sort test", "[insertion_sort]")
 {
 
 	SECTION("Case 01")
@@ -22,7 +22,7 @@ TEST_CASE("quick_sort test", "[quick_sort]")
 		}
 
 		CHECK(!cpprelude::is_sorted(arr.begin(), arr.count()));
-		quick_sort(arr.begin(),arr.count());
+		insertion_sort(arr.begin(),arr.count());
 		CHECK(cpprelude::is_sorted(arr.begin(), arr.count()));
 				
 	}
@@ -38,7 +38,7 @@ TEST_CASE("quick_sort test", "[quick_sort]")
 		}
 		
 		CHECK(!cpprelude::is_sorted(arr.begin(), arr.count()));
-		quick_sort(arr.begin(), arr.count());
+		insertion_sort(arr.begin(), arr.count());
 		CHECK(cpprelude::is_sorted(arr.begin(), arr.count()));
 	}
 
@@ -53,7 +53,7 @@ TEST_CASE("quick_sort test", "[quick_sort]")
 		}
 
 		CHECK(!cpprelude::is_sorted(arr.begin(), arr.count()));
-		quick_sort(arr.begin(), arr.count());
+		insertion_sort(arr.begin(), arr.count());
 		CHECK(cpprelude::is_sorted(arr.begin(), arr.count()));
 	}
 
@@ -73,25 +73,8 @@ TEST_CASE("quick_sort test", "[quick_sort]")
 		};
 
 		CHECK(!cpprelude::is_sorted(arr.begin(), arr.count(), fun));
-		quick_sort(arr.begin(), arr.count(), fun);
+		insertion_sort(arr.begin(), arr.count(), fun);
 		CHECK(cpprelude::is_sorted(arr.begin(), arr.count(), fun));
 	}
 
-	SECTION("Case 05")
-	{
-		usize length = 128;
-		dynamic_array<usize> arr(length);
-
-		for (usize i = 0; i < length; i++)
-		{
-			arr[i] = i;
-		}
-
-		CHECK(cpprelude::is_sorted(arr.begin(), arr.count()));
-		
-		for(usize i = 0; i < length; ++i)
-		{
-			CHECK(*cpprelude::quick_select(arr.begin(), length, i) == i);
-		}
-	}
 }

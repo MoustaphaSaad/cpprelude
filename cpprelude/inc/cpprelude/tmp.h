@@ -38,5 +38,14 @@ namespace cpprelude
 		{
 			return static_cast<T&&>(value);
 		}
+
+		template<typename T>
+		void
+		swap(T& a, T& b)
+		{
+			T temp = tmp::move(a);
+			a = tmp::move(b);
+			b = tmp::move(temp);
+		}
 	}
 }
