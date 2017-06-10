@@ -17,6 +17,7 @@
 #include <cpprelude/queue_list.h>
 #include <cpprelude/queue_array.h>
 #include <queue>
+#include <cpprelude/priority_queue.h>
 
 #include <cpprelude/algorithm.h>
 #include <algorithm>
@@ -486,6 +487,40 @@ benchmark_queue_array(cpprelude::usize limit)
 }
 
 void
+benchmark_priority_queue(cpprelude::usize limit)
+{
+	double avg_sec = 0, avg_milli = 0, avg_micro = 0, avg_nano = 0;
+
+	stopwatch w;
+	for (cpprelude::usize j = 0; j < 100; ++j)
+	{
+		cpprelude::priority_queue<cpprelude::usize>  array;
+
+		w.start();
+		for (cpprelude::usize i = 0; i < limit; ++i)
+			array.enqueue(i);
+		w.stop();
+
+		avg_sec += w.seconds();
+		avg_milli += w.milliseconds();
+		avg_micro += w.microseconds();
+		avg_nano += w.nanoseconds();
+	}
+
+	avg_sec /= 100;
+	avg_milli /= 100;
+	avg_micro /= 100;
+	avg_nano /= 100;
+
+
+	std::cout << "benchmark priority_queue" << std::endl;
+	std::cout << "seconds: " << avg_sec << std::endl;
+	std::cout << "milliseconds: " << avg_milli << std::endl;
+	std::cout << "microseconds: " << avg_micro << std::endl;
+	std::cout << "nanoseconds: " << avg_nano << std::endl;
+}
+
+void
 benchmark_custom_queue_array(cpprelude::usize limit)
 {
 	double avg_sec = 0, avg_milli = 0, avg_micro = 0, avg_nano = 0;
@@ -644,6 +679,47 @@ benchmark_insertion_sort(cpprelude::usize limit)
 	std::cout << "microseconds: " << avg_micro << std::endl;
 	std::cout << "nanoseconds: " << avg_nano << std::endl;
 }
+
+void
+benchmark_heap_sort(cpprelude::usize limit)
+{
+	double avg_sec = 0, avg_milli = 0, avg_micro = 0, avg_nano = 0;
+
+	std::random_device device;
+	std::mt19937 generator(device());
+	std::uniform_int_distribution<cpprelude::usize> distribution(0, limit);
+
+	stopwatch w;
+	for (cpprelude::usize j = 0; j < 100; ++j)
+	{
+		cpprelude::dynamic_array<cpprelude::usize> array;
+
+		for (cpprelude::usize i = 0; i < limit; ++i)
+			array.insert_back(distribution(generator));
+
+		w.start();
+		cpprelude::heap_sort(array.begin(), array.count());
+		w.stop();
+
+		avg_sec += w.seconds();
+		avg_milli += w.milliseconds();
+		avg_micro += w.microseconds();
+		avg_nano += w.nanoseconds();
+	}
+
+	avg_sec /= 100;
+	avg_milli /= 100;
+	avg_micro /= 100;
+	avg_nano /= 100;
+
+
+	std::cout << "benchmark heap_sort" << std::endl;
+	std::cout << "seconds: " << avg_sec << std::endl;
+	std::cout << "milliseconds: " << avg_milli << std::endl;
+	std::cout << "microseconds: " << avg_micro << std::endl;
+	std::cout << "nanoseconds: " << avg_nano << std::endl;
+}
+
 
 //STD
 
@@ -985,6 +1061,8 @@ benchmark()
 	benchmark_queue_array(limit);
 	std::cout << std::endl;
 	benchmark_custom_queue_array(limit);
+	std::cout << std::endl;
+	benchmark_priority_queue(limit);
 
 	std::cout <<"============================================================"<< std::endl;
 
@@ -995,6 +1073,8 @@ benchmark()
 	benchmark_merge_sort(limit);
 	std::cout << std::endl;
 	benchmark_quick_sort(limit);
+	std::cout << std::endl;
+	benchmark_heap_sort(limit);
 	std::cout << "\nnext size = 1/10 of original benchmark size\n" << std::endl;
 	benchmark_insertion_sort(limit/10);
 

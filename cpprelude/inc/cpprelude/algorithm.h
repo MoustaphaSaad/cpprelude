@@ -6,6 +6,7 @@
 #include <random>
 #include <cpprelude/dynamic_array.h>
 #include <cpprelude/stack_array.h>
+#include <cpprelude/priority_queue.h>
 
 namespace cpprelude
 {
@@ -516,4 +517,47 @@ namespace cpprelude
 		_quick_sort_3way(begin_it, count, less_than);
 	}
 
+	template<typename T, typename Comparator = details::default_less_than<T>>
+	bool
+	is_heap(dynamic_array<T> arr, usize count, Comparator compare = Comparator())
+	{
+		usize l, r;
+		for (usize i = 0; i < count; i++)
+		{
+			l = 2 * i + 1;
+			r = 2 * i + 2;
+			if (l < count && compare(arr[l], arr[i])) return false;
+			if (r < count && compare(arr[r], arr[i])) return false;
+		}
+		return true;
+	}
+
+	template<typename iterator_type, typename function_type = details::default_less_than<typename iterator_type::data_type>>
+	void
+	heap_sort(iterator_type begin_it, usize count, function_type less_than = function_type())
+	{
+		auto it = begin_it;
+		priority_queue<typename iterator_type::data_type> queue(begin_it, count);
+
+		it = begin_it;
+		for (usize i = 0; i < count; i++)
+		{
+			*it = queue.front();
+			queue.dequeue();
+			it = next(it);
+		}
+	}
+
+	template<typename T, typename function_type = details::default_less_than<T>>
+	void
+	heap_sort(dynamic_array<T>& arr, function_type less_than = function_type())
+	{
+		priority_queue<T> queue(arr);
+		if(!is_heap(queue._array, queue.count())) return;
+		for (usize i = 0; i < arr.count(); i++)
+		{
+			arr[i]= queue.front();
+			queue.dequeue();
+		}
+	}
 }
