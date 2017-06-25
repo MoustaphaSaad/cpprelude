@@ -13,13 +13,13 @@ TEST_CASE("associative_array test", "[associative_array]")
 {
 	_RB_tree<int, int> array;
 	dynamic_array<int> arr;
-	std::function <void(const _RB_tree<int, int>::RB_Node&)> insert = [&arr](const _RB_tree<int, int>::RB_Node& obj) {
+	std::function <void(const _RB_Node<int>&)> insert = [&arr](const _RB_Node<int>& obj) {
 		arr.insert_back(obj.key);
 	};
 
-	std::function <void(const _RB_tree<int, int>::RB_Node&)> print = [](const _RB_tree<int, int>::RB_Node& obj) {
+	std::function <void(const _RB_Node<int>&)> print = [](const _RB_Node<int>& obj) {
 		auto c = obj.color == _color_type::RED ? "RED" : "BLACK";
-		std::cout << "key: " << obj.key << " value: " << obj.value << " color: " << c << std::endl;
+		std::cout << "key: " << obj.key /*<< " value: " << obj.value*/ << " color: " << c << std::endl;
 		auto temp = obj.parent != nullptr ? obj.parent->key : 0;
 		std::cout << "parent " << temp << " ";
 		temp = obj.left != nullptr ? obj.left->key : 0;
@@ -137,12 +137,12 @@ TEST_CASE("associative_array test", "[associative_array]")
 		}*/
 		//array.inorder_traverse(print);
 
-		array.insert(1, 11);
-		array.insert(2, 22);
-		array.insert(3, 33);
-		auto x = array.insert(3, 22);
+		array.insert(1);
+		array.insert(2);
+		array.insert(3);
+		auto x = array.insert(3);
 		//if (x == array._root)
-			std::cout << (x)->key <<" " <<(x)->value<<std::endl;
+			std::cout << (x)->key <</*" " <<(x)->value<<*/std::endl;
 
 	}
 }
