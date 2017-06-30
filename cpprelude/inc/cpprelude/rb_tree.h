@@ -61,15 +61,13 @@ namespace cpprelude
 		~rb_tree()
 		{
 			//_reset();
-			_reset(rb_iterator(_root));
+			clear();
 		}
 
 		rb_tree<T>&
 		operator=(const rb_tree<T>& other)
 		{
-			_reset(rb_iterator(_root));
-			_root = nullptr;
-			_count = 0;
+			clear();
 			_allocator = other._allocator;
 			_copy_content(other);
 			return *this;
@@ -83,6 +81,15 @@ namespace cpprelude
 			it->data.~T();
 			_allocator.free(make_slice(&(*it)));
 			--_count;
+		}
+
+		void
+		clear()
+		{
+			_reset(rb_iterator(_root));
+			_root = nullptr;
+			_count = 0;
+			_allocator = AllocatorT();
 		}
 
 		void
@@ -443,6 +450,50 @@ namespace cpprelude
 			_free_mem(rb_iterator(y));
 		}
 
+		void
+		delete_rb_tree(rb_iterator it)
+		{
+			RB_Node* node_to_delete = &(*it);
+
+			if (node_to_delete == nullptr) return;
+
+			RB_Node* y = nullptr, *x = nullptr, *x_parent = nullptr;
+
+			if (node_to_delete->left == nullptr || node_to_delete->right == nullptr)
+				y = node_to_delete;
+			else
+				y = _get_successor(node_to_delete);
+
+			if (y->left != nullptr)
+				x = y->left;
+			else
+				x = y->right;
+
+			if (x != nullptr)
+				x->parent = y->parent;
+
+			x_parent = y->parent;
+
+			if (y->parent == nullptr)
+			{
+				_root = x;
+				if (x != nullptr)
+					x->color = COLOR::BLACK;
+			}
+			else if (y == y->parent->left)
+				y->parent->left = x;
+			else
+				y->parent->right = x;
+
+			if (y != node_to_delete)
+				node_to_delete->data = y->data;
+
+			if (y->color == COLOR::BLACK)
+				_rb_delete_fixup(x, x_parent);
+
+			_free_mem(rb_iterator(y));
+		}
+
 		RB_Node*
 		_get_successor(RB_Node* node)
 		{
@@ -791,6 +842,40 @@ namespace cpprelude
 				return -1;
 			else
 				return (it->color == COLOR::RED) ? left_count : left_count + 1;
+		}
+
+		void
+		swap(rb_tree& other)
+		{
+			tmp::swap(_root, other._root);
+			tmp::swap(_count, other._count);
+			tmp::swap(_allocator, other._allocator);
+		}
+
+		rb_iterator
+		get_min()
+		{
+			auto min = _root;
+			if (min == nullptr) return rb_iterator();
+
+			while (min->left != nullptr)
+			{
+				min = min->left;
+			}
+			return min;
+		}
+
+		rb_iterator
+		get_max()
+		{
+			auto max = _root;
+			if (max == nullptr) return rb_iterator();
+
+			while (max->right != nullptr)
+			{
+				max = max->right;
+			}
+			return max;
 		}
 
 		rb_iterator

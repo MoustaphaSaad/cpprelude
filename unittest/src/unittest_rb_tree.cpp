@@ -23,7 +23,7 @@ void print_fn(rb_tree_iterator<T> it)
 	std::cout << "==================================\n";
 }
 
-TEST_CASE("associative_array test", "[associative_array]")
+TEST_CASE("rb_tree test", "[rb_tree]")
 {
 	rb_tree<usize> array;
 	dynamic_array<usize> arr;
