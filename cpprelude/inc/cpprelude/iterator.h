@@ -39,9 +39,37 @@ namespace cpprelude
 			pair_node()
 			{}
 
+			pair_node(const key_type& k)
+				:key(k)
+			{}
+
 			pair_node(const key_type& k, const value_type& v)
 				:key(k), value(v)
 			{}
+
+			bool
+			operator < (const pair_node<key_type, value_type> & other) const
+			{
+				return key < other.key;
+			}
+
+			bool
+			operator > (const pair_node<key_type, value_type> & other) const
+			{
+				return key > other.key;
+			}
+
+			bool
+			operator == (const pair_node<key_type, value_type> & other) const
+			{
+				return key == other.key;
+			}
+
+			bool
+			operator != (const pair_node<key_type, value_type> & other) const
+			{
+				return key != other.key;
+			}
 		};
 		enum color_type { RED, BLACK };
 		template<typename T>
@@ -458,32 +486,16 @@ namespace cpprelude
 			:_node(n)
 		{}
 
-		rb_tree_iterator(T* n)
-			:_node(n)
-		{}
-		
-		RB_NODE*
-		get_left()
+		bool
+		operator==(const rb_tree_iterator<T>& other) const
 		{
-			return _node->left;
+			return _node == other._node;
 		}
 
-		RB_NODE*
-		get_right()
+		bool
+		operator!=(const rb_tree_iterator<T>& other) const
 		{
-			return _node->right;
-		}
-
-		RB_NODE*
-		get_parent()
-		{
-			return _node->parent;
-		}
-
-		details::color_type
-		get_color() const
-		{
-			return _node->color;
+			return _node != other._node;
 		}
 
 		void
