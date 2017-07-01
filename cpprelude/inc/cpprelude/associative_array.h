@@ -13,9 +13,10 @@ namespace cpprelude
 	struct associative_array
 	{
 		using pair_node = details::pair_node<key_type, value_type>;
+		using data_type = pair_node;
 		using rb_iterator = rb_tree_iterator<pair_node>;
 		using const_rb_iterator = const rb_tree_iterator<pair_node>;
-		rb_tree <pair_node> _tree;
+		rb_tree <pair_node, AllocatorT> _tree;
 		
 		associative_array(const AllocatorT& allocator = AllocatorT())
 			:_tree(allocator)
@@ -42,6 +43,16 @@ namespace cpprelude
 		{
 		}
 
+		associative_array(associative_array<key_type, value_type>&& other, const AllocatorT& allocator)
+			:_tree(tmp::move(other._tree), allocator)
+		{
+		}
+
+		associative_array(associative_array<key_type, value_type>&& other)
+			:_tree(tmp::move(other._tree))
+		{
+		}
+		
 		rb_iterator
 		insert(const key_type& k)
 		{
@@ -60,6 +71,25 @@ namespace cpprelude
 			return _tree.insert(p);
 		}
 
+		rb_iterator
+		insert(key_type&& k)
+		{
+			return _tree.insert(tmp::move(pair_node(tmp::move(k))));
+		}
+
+		rb_iterator
+		insert(key_type&& k, value_type&& v)
+		{
+			return _tree.insert(tmp::move(pair_node(tmp::move(k), tmp::move(v))));
+		}
+
+		rb_iterator
+		insert(pair_node && p)
+		{
+			return _tree.insert(tmp::move(p));
+		}
+
+
 		void
 		erase(rb_iterator it)
 		{
@@ -76,6 +106,12 @@ namespace cpprelude
 		swap(associative_array& other)
 		{
 			_tree.swap(other._tree);
+		}
+
+		void
+		swap(associative_array&& other)
+		{
+			_tree.swap(tmp::move(other._tree));
 		}
 
 		rb_iterator
@@ -106,6 +142,12 @@ namespace cpprelude
 
 		value_type&
 		operator[](const key_type& key)
+		{
+			return at(key);
+		}
+
+		value_type
+		operator[](const key_type& key) const
 		{
 			return at(key);
 		}

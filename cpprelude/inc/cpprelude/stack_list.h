@@ -65,13 +65,13 @@ namespace cpprelude
 		}
 		
 		bool
-		empty()
+		empty() const
 		{
 			return _list.empty();
 		}
 		
 		usize
-		count()
+		count() const
 		{
 			return _list.count();
 		}

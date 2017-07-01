@@ -58,6 +58,25 @@ namespace cpprelude
 			_copy_content(other);
 		}
 
+		rb_tree(rb_tree<T>&& other)
+			:_root(nullptr), _count(0), _allocator(tmp::move(other._allocator))
+		{
+			//auto self = const_cast<_RB_tree<T>*>(this);
+			/*auto copy = [&](rb_iterator it)
+			{
+			insert(it->data);
+			};
+			other.inorder_traverse(copy);*/
+
+			_copy_content(tmp::move(other));
+		}
+
+		rb_tree(rb_tree<T>&& other, const AllocatorT& allocator)
+			:_root(nullptr), _count(0), _allocator(allocator)
+		{
+			_copy_content(tmp::move(other));
+		}
+
 		~rb_tree()
 		{
 			//_reset();
@@ -73,14 +92,188 @@ namespace cpprelude
 			return *this;
 		}
 
-		void 
-		_free_mem(rb_iterator it)
+		rb_tree<T>&
+		operator=(rb_tree<T>&& other)
 		{
-			if (it == nullptr) return;
+			clear();
+			_allocator = tmp::move(other._allocator);
+			_copy_content(tmp::move(other));
+			return *this;
+		}
 
-			it->data.~T();
-			_allocator.free(make_slice(&(*it)));
-			--_count;
+		//modify if exisits, and insert if not.
+		rb_iterator
+		insert(const T& key)
+		{
+			auto it_new_node = _create_node(key);
+			if (_root == nullptr)
+			{
+				_root = &(*it_new_node);
+				_recolor(it_new_node);
+				++_count;
+				return it_new_node;
+			}
+			else
+			{
+				auto temp = _insert(_root, *it_new_node);
+				_reset_root();
+				++_count;
+				return temp;
+			}
+		}
+
+		//modify if exisits, and insert if not.
+		rb_iterator
+		insert(T&& key)
+		{
+			auto it_new_node = _create_node(tmp::move(key));
+			if (_root == nullptr)
+			{
+				_root = &(*it_new_node);
+				_recolor(it_new_node);
+				++_count;
+				return it_new_node;
+			}
+			else
+			{
+				auto temp = _insert(_root, tmp::move(*it_new_node));
+				_reset_root();
+				++_count;
+				return temp;
+			}
+		}
+
+		void
+		delete_rb_tree(const T&k)
+		{
+			RB_Node* node_to_delete = &(*lookup(k));
+
+			if (node_to_delete == nullptr) return;
+
+			RB_Node* y = nullptr, *x = nullptr, *x_parent = nullptr;
+
+			if (node_to_delete->left == nullptr || node_to_delete->right == nullptr)
+				y = node_to_delete;
+			else
+				y = _get_successor(node_to_delete);
+
+			if (y->left != nullptr)
+				x = y->left;
+			else
+				x = y->right;
+
+			if (x != nullptr)
+				x->parent = y->parent;
+
+			x_parent = y->parent;
+
+			if (y->parent == nullptr)
+			{
+				_root = x;
+				if (x != nullptr)
+					x->color = COLOR::BLACK;
+			}
+			else if (y == y->parent->left)
+				y->parent->left = x;
+			else
+				y->parent->right = x;
+
+			if (y != node_to_delete)
+				node_to_delete->data = y->data;
+
+			if (y->color == COLOR::BLACK)
+				_rb_delete_fixup(x, x_parent);
+
+			_free_mem(rb_iterator(y));
+		}
+
+		void
+		delete_rb_tree(rb_iterator it)
+		{
+			RB_Node* node_to_delete = &(*it);
+
+			if (node_to_delete == nullptr) return;
+
+			RB_Node* y = nullptr, *x = nullptr, *x_parent = nullptr;
+
+			if (node_to_delete->left == nullptr || node_to_delete->right == nullptr)
+				y = node_to_delete;
+			else
+				y = _get_successor(node_to_delete);
+
+			if (y->left != nullptr)
+				x = y->left;
+			else
+				x = y->right;
+
+			if (x != nullptr)
+				x->parent = y->parent;
+
+			x_parent = y->parent;
+
+			if (y->parent == nullptr)
+			{
+				_root = x;
+				if (x != nullptr)
+					x->color = COLOR::BLACK;
+			}
+			else if (y == y->parent->left)
+				y->parent->left = x;
+			else
+				y->parent->right = x;
+
+			if (y != node_to_delete)
+				node_to_delete->data = y->data;
+
+			if (y->color == COLOR::BLACK)
+				_rb_delete_fixup(x, x_parent);
+
+			_free_mem(rb_iterator(y));
+		}
+
+		rb_iterator
+		lookup(const T& key)
+		{
+			rb_iterator result;
+			if (_root != nullptr)
+				result = _lookup(key, _root);
+			return result;
+		}
+
+		const_rb_iterator
+		lookup(const T& key) const
+		{
+			const_rb_iterator result;
+			if (_root != nullptr)
+				result = _lookup(key, _root);
+			return result;
+		}
+
+		rb_iterator
+		operator[](const T& key)
+		{	//this function either returns the existed node or the new inserted node
+			return insert(key);
+		}
+
+		template<typename function_type>
+		void
+		inorder_traverse(function_type FT)
+		{
+			_inorder_traverse(FT, _root);
+		}
+
+		template<typename function_type>
+		void
+		postorder_traverse(function_type FT)
+		{
+			_postorder_traverse(FT, _root);
+		}
+
+		template<typename function_type>
+		void
+		preorder_traverse(function_type FT)
+		{
+			_preorder_traverse(FT, _root);
 		}
 
 		void
@@ -90,6 +283,82 @@ namespace cpprelude
 			_root = nullptr;
 			_count = 0;
 			_allocator = AllocatorT();
+		}
+
+		void
+		swap(rb_tree& other)
+		{
+			tmp::swap(_root, other._root);
+			tmp::swap(_count, other._count);
+			tmp::swap(_allocator, other._allocator);
+		}
+
+		void
+		swap(rb_tree&& other)
+		{
+			tmp::swap(_root, other._root);
+			tmp::swap(_count, tmp::move(other._count));
+			tmp::swap(_allocator, tmp::move(other._allocator));
+		}
+
+		rb_iterator
+		get_min() const
+		{
+			auto min = _root;
+			if (min == nullptr) return rb_iterator();
+
+			while (min->left != nullptr)
+			{
+				min = min->left;
+			}
+			return min;
+		}
+
+		rb_iterator
+		get_max() const
+		{
+			auto max = _root;
+			if (max == nullptr) return rb_iterator();
+
+			while (max->right != nullptr)
+			{
+				max = max->right;
+			}
+			return max;
+		}
+
+		rb_iterator
+		get_root() const
+		{
+			return rb_iterator(_root);
+		}
+
+		usize
+		count() const
+		{
+			return _count;
+		}
+
+		usize
+		empty() const
+		{
+			return _count == 0;
+		}
+
+		bool
+		is_rb_tree()
+		{
+			return (-1 != _calculate_Black_count(_root));
+		}
+
+		void
+		_free_mem(rb_iterator it)
+		{
+			if (it == nullptr) return;
+
+			it->data.~T();
+			_allocator.free(make_slice(&(*it)));
+			--_count;
 		}
 
 		void
@@ -125,78 +394,30 @@ namespace cpprelude
 			}
 		}
 
-		//modify if exisits, and insert if not.
-		rb_iterator 
-		insert(const T& key)
+		void
+		_copy_content(rb_tree<T>&& other)
 		{
-			auto it_new_node =_create_node(key);
-			if (_root == nullptr)
+			queue_array<rb_iterator> queue;
+			queue.enqueue(tmp::move(other.get_root()));
+
+			while (!queue.empty())
 			{
-				_root = &(*it_new_node);
-				_recolor(it_new_node);
-				++_count;
-				return it_new_node;
-			}
-			else
-			{
-				auto temp = _insert(_root, *it_new_node);
-				_reset_root();
-				++_count;
-				return temp;
+				auto it = queue.front();
+				queue.dequeue();
+				if (it == nullptr) continue;
+
+				insert(tmp::move(it->data));
+				queue.enqueue(tmp::move(it->left));
+				queue.enqueue(tmp::move(it->right));
 			}
 		}
-		
+
 		void 
 		_reset_root()
 		{
 			if (_root == nullptr) return;
 			while (_root->parent != nullptr)
 				_root = _root->parent;
-		}
-
-		rb_iterator 
-		lookup(const T& key)
-		{
-			rb_iterator result;
-			if (_root != nullptr)
-				result = _lookup(key, _root);
-			return result;
-		}
-
-		const_rb_iterator
-		lookup(const T& key) const
-		{
-			const_rb_iterator result;
-			if (_root != nullptr)
-				result = _lookup(key, _root);
-			return result;
-		}
-
-		rb_iterator
-		operator[](const T& key)
-		{	//this function either returns the existed node or the new inserted node
-			return insert(key);
-		}
-
-		template<typename function_type>
-		void 
-		inorder_traverse(function_type FT) 
-		{
-			_inorder_traverse(FT, _root);
-		}
-
-		template<typename function_type>
-		void
-		postorder_traverse(function_type FT) 
-		{
-			_postorder_traverse(FT, _root);
-		}
-
-		template<typename function_type>
-		void
-		preorder_traverse(function_type FT)
-		{
-			_preorder_traverse(FT, _root);
 		}
 
 		void
@@ -345,6 +566,14 @@ namespace cpprelude
 		}
 
 		rb_iterator
+		_create_node(T&& k)
+		{
+			auto temp = _allocator.template alloc<RB_Node>();
+			new (temp) RB_Node(k);
+			return rb_iterator(temp);
+		}
+
+		rb_iterator
 		_insert(RB_Node* it,const RB_Node& new_node)
 		{
 			if (new_node.data < it->data)
@@ -404,94 +633,6 @@ namespace cpprelude
 			}
 			else
 				return rb_iterator(it);
-		}
-
-		void
-		delete_rb_tree(const T&k)
-		{
-			RB_Node* node_to_delete = &(*lookup(k));
-			
-			if (node_to_delete == nullptr) return;
-
-			RB_Node* y = nullptr, *x = nullptr, *x_parent = nullptr;
-
-			if (node_to_delete->left == nullptr || node_to_delete->right == nullptr)
-				y = node_to_delete;
-			else
-				y = _get_successor(node_to_delete);
-
-			if (y->left != nullptr)
-				x = y->left;
-			else
-				x = y->right;
-
-			if (x != nullptr)
-				x->parent = y->parent;
-			
-			x_parent = y->parent;
-
-			if (y->parent == nullptr)
-			{
-				_root = x;
-				if (x != nullptr)
-					x->color = COLOR::BLACK;
-			}
-			else if (y == y->parent->left)
-				y->parent->left = x;
-			else
-				y->parent->right = x;
-
-			if (y != node_to_delete)
-				node_to_delete->data = y->data;
-
-			if (y->color == COLOR::BLACK)
-					_rb_delete_fixup(x, x_parent);
-
-			_free_mem(rb_iterator(y));
-		}
-
-		void
-		delete_rb_tree(rb_iterator it)
-		{
-			RB_Node* node_to_delete = &(*it);
-
-			if (node_to_delete == nullptr) return;
-
-			RB_Node* y = nullptr, *x = nullptr, *x_parent = nullptr;
-
-			if (node_to_delete->left == nullptr || node_to_delete->right == nullptr)
-				y = node_to_delete;
-			else
-				y = _get_successor(node_to_delete);
-
-			if (y->left != nullptr)
-				x = y->left;
-			else
-				x = y->right;
-
-			if (x != nullptr)
-				x->parent = y->parent;
-
-			x_parent = y->parent;
-
-			if (y->parent == nullptr)
-			{
-				_root = x;
-				if (x != nullptr)
-					x->color = COLOR::BLACK;
-			}
-			else if (y == y->parent->left)
-				y->parent->left = x;
-			else
-				y->parent->right = x;
-
-			if (y != node_to_delete)
-				node_to_delete->data = y->data;
-
-			if (y->color == COLOR::BLACK)
-				_rb_delete_fixup(x, x_parent);
-
-			_free_mem(rb_iterator(y));
 		}
 
 		RB_Node*
@@ -824,12 +965,6 @@ namespace cpprelude
 				return const_rb_iterator(it);
 		}
 
-		bool
-		is_rb_tree()
-		{
-			return (-1 != _calculate_Black_count(_root));
-		}
-
 		isize
 		_calculate_Black_count(RB_Node* it)
 		{
@@ -844,50 +979,5 @@ namespace cpprelude
 				return (it->color == COLOR::RED) ? left_count : left_count + 1;
 		}
 
-		void
-		swap(rb_tree& other)
-		{
-			tmp::swap(_root, other._root);
-			tmp::swap(_count, other._count);
-			tmp::swap(_allocator, other._allocator);
-		}
-
-		rb_iterator
-		get_min()
-		{
-			auto min = _root;
-			if (min == nullptr) return rb_iterator();
-
-			while (min->left != nullptr)
-			{
-				min = min->left;
-			}
-			return min;
-		}
-
-		rb_iterator
-		get_max()
-		{
-			auto max = _root;
-			if (max == nullptr) return rb_iterator();
-
-			while (max->right != nullptr)
-			{
-				max = max->right;
-			}
-			return max;
-		}
-
-		rb_iterator
-		get_root() const
-		{
-			return rb_iterator(_root);
-		}
-
-		usize
-		count()
-		{
-			return _count;
-		}
 	};
 }
