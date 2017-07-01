@@ -29,6 +29,75 @@ namespace cpprelude
 				:next(nullptr), prev(nullptr)
 			{}
 		};
+		
+		template<typename key_type, typename value_type>
+		struct pair_node
+		{
+			key_type key;
+			value_type value;
+
+			pair_node()
+			{}
+
+			pair_node(const key_type& k)
+				:key(k)
+			{}
+
+			pair_node(const key_type& k, const value_type& v)
+				:key(k), value(v)
+			{}
+
+			bool
+			operator < (const pair_node<key_type, value_type> & other) const
+			{
+				return key < other.key;
+			}
+
+			bool
+			operator > (const pair_node<key_type, value_type> & other) const
+			{
+				return key > other.key;
+			}
+
+			bool
+			operator == (const pair_node<key_type, value_type> & other) const
+			{
+				return key == other.key;
+			}
+
+			bool
+			operator != (const pair_node<key_type, value_type> & other) const
+			{
+				return key != other.key;
+			}
+		};
+		enum color_type { RED, BLACK };
+		template<typename T>
+		struct rb_node
+		{
+			
+			T data;
+			color_type color;
+			rb_node<T> * left;
+			rb_node<T> * right;
+			rb_node<T> * parent;
+
+			rb_node()
+				:left(nullptr), right(nullptr), parent(nullptr), color (RED)
+			{}
+
+			rb_node(const T& d, color_type c = RED)
+				:data(d), left(nullptr), right(nullptr), parent(nullptr), color(c)
+			{}
+
+			rb_node(const T& d,  rb_node<T>* p, color_type c = RED )
+				:data(d), left(nullptr), right(nullptr), parent(p), color(c)
+			{}
+
+			rb_node(const T& d, rb_node<T>* p, rb_node<T>* l, rb_node<T>* r,  color_type c = RED)
+				:data(d), left(l), right(r), parent(p), color(c)
+			{}
+		};
 	}
 
 	template<typename T>
@@ -402,6 +471,75 @@ namespace cpprelude
 		}
 	};
 
+	template<typename T>
+	struct rb_tree_iterator
+	{
+		using data_type = T;
+		using RB_NODE = details::rb_node<T>;
+		RB_NODE* _node;
+
+		rb_tree_iterator()
+			:_node(nullptr)
+		{}
+		
+		rb_tree_iterator(RB_NODE* n)
+			:_node(n)
+		{}
+
+		bool
+		operator==(const rb_tree_iterator<T>& other) const
+		{
+			return _node == other._node;
+		}
+
+		bool
+		operator!=(const rb_tree_iterator<T>& other) const
+		{
+			return _node != other._node;
+		}
+
+		void
+		move_up()
+		{
+			_node = _node->parent;
+		}
+
+		void
+		move_left()
+		{
+			_node = _node->left;
+		}
+
+		void
+		move_right()
+		{
+			_node = _node->right;
+		}
+
+		RB_NODE*
+		operator->()
+		{
+			return &(*_node);
+		}
+
+		const RB_NODE*
+		operator->() const
+		{
+			return &(*_node);
+		}
+
+		const RB_NODE&
+		operator*() const
+		{
+			return *_node;
+		}
+
+		RB_NODE&
+		operator*()
+		{
+			return *_node;
+		}
+	};
 	template<typename T>
 	T
 	next(T it, usize n = 1)

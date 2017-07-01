@@ -23,6 +23,9 @@
 #include <cpprelude/algorithm.h>
 #include <algorithm>
 
+#include <cpprelude/associative_array.h>
+#include <map>
+
 #include <iostream>
 
 void
@@ -755,6 +758,47 @@ benchmark_heap_sort(cpprelude::usize limit)
 	std::cout << "nanoseconds: " << avg_nano << std::endl;
 }
 
+void
+benchmarck_associative_array(cpprelude::usize limit)
+{
+	double avg_sec = 0, avg_milli = 0, avg_micro = 0, avg_nano = 0;
+
+	cpprelude::slice<cpprelude::ubyte> mem_block;
+	auto arena_allocator = cpprelude::make_arena_allocator(MEGABYTES(25), mem_block);
+
+	stopwatch w;
+	for (cpprelude::usize j = 0; j < 100; ++j)
+	{
+		cpprelude::associative_array<cpprelude::usize, cpprelude::usize, cpprelude::linear_allocator> 
+			array(arena_allocator);
+
+		w.start();
+		for (cpprelude::usize i = 0; i < limit; ++i)
+			array.insert(cpprelude::details::pair_node<cpprelude::usize, cpprelude::usize>(i,i));
+		w.stop();
+
+		avg_sec += w.seconds();
+		avg_milli += w.milliseconds();
+		avg_micro += w.microseconds();
+		avg_nano += w.nanoseconds();
+	}
+
+	avg_sec /= 100;
+	avg_milli /= 100;
+	avg_micro /= 100;
+	avg_nano /= 100;
+
+
+	std::cout << "benchmark custom assocaitve_array" << std::endl;
+	std::cout << "seconds: " << avg_sec << std::endl;
+	std::cout << "milliseconds: " << avg_milli << std::endl;
+	std::cout << "microseconds: " << avg_micro << std::endl;
+	std::cout << "nanoseconds: " << avg_nano << std::endl;
+	std::cout << "alive allocation: " << arena_allocator._alloc_count << std::endl;
+
+	cpprelude::virtual_free(mem_block);
+}
+
 
 //STD
 
@@ -1116,6 +1160,38 @@ benchmark_std_heap_sort(cpprelude::usize limit)
 	std::cout << "nanoseconds: " << avg_nano << std::endl;
 }
 
+void
+benchmark_std_map(std::size_t limit)
+{
+	double avg_sec = 0, avg_milli = 0, avg_micro = 0, avg_nano = 0;
+
+	stopwatch w;
+	for (cpprelude::usize j = 0; j < 100; ++j)
+	{
+		std::map<std::size_t, std::size_t> array;
+
+		w.start();
+		for (std::size_t i = 0; i < limit; ++i)
+			array.insert(std::pair<std::size_t, std::size_t>(i,i));
+		w.stop();
+
+		avg_sec += w.seconds();
+		avg_milli += w.milliseconds();
+		avg_micro += w.microseconds();
+		avg_nano += w.nanoseconds();
+	}
+
+	avg_sec /= 100;
+	avg_milli /= 100;
+	avg_micro /= 100;
+	avg_nano /= 100;
+
+	std::cout << "benchmark map" << std::endl;
+	std::cout << "seconds: " << avg_sec << std::endl;
+	std::cout << "milliseconds: " << avg_milli << std::endl;
+	std::cout << "microseconds: " << avg_micro << std::endl;
+	std::cout << "nanoseconds: " << avg_nano << std::endl;
+}
 
 void 
 benchmark()
@@ -1131,6 +1207,12 @@ benchmark()
 	benchmark_custom_dynamic_array(limit);
 
 	std::cout <<"============================================================"<< std::endl;
+
+	benchmarck_associative_array(limit);
+	std::cout << std::endl;
+	benchmark_std_map(limit);
+
+	std::cout << "============================================================" << std::endl;
 
 	benchmark_stack(limit);
 	std::cout << std::endl;
