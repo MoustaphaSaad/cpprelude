@@ -20,6 +20,9 @@ project "cpprelude"
 		end
 
 		buildoptions {"/utf-8"}
+
+		filter "action:vs*"
+			files {"tools/vs/cpprelude.natvis"}
 	end
 
 	filter "configurations:debug"
