@@ -18,14 +18,14 @@ For Philosophy and coding standard please refer to this [link](https://moustapha
 
 ## Building
 
-1. **CPPrelude** uses premake5 as its meta build system so you have to download premake5
+1. **CPPrelude** uses premake5 as its meta build system so you have to download premake5.
 2. Use premake5 to generate project/solution files in order to compile the library.
-   1. Ex: `premake5 gmake` this will generate the build folder with linux make files inside
-   2. Ex: `premake5 vs2015` this will generate the build folder with visual studio 2015 solution files inside
-3. **CPPrelude** supports 32-bit and 64-bit targets and has a *debugShared* and *releaseShared* modes
-4. building the library is as easy as invoking your build system
-5. binaries should be generated inside a bin folder right beside the build folder
-6. Also a unittest executable will be generated you can invoke it to test your **CPPrelude** build
+   1. Ex: `premake5 gmake` this will generate the build folder with Linux make files inside.
+   2. Ex: `premake5 vs2015` this will generate the build folder with visual studio 2015 solution files inside.
+3. **CPPrelude** supports 32-bit and 64-bit targets and has a *debugShared* and *releaseShared* modes.
+4. Building the library is as easy as invoking your build system.
+5. Binaries should be generated inside a bin folder right beside the build folder,
+6. Also, a unittest executable will be generated. You can invoke it to test your **CPPrelude** build.
 
 
 ## Content

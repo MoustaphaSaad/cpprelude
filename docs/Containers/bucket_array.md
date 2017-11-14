@@ -12,7 +12,7 @@ struct bucket_array;
 ```
 
 1. **T**: specifics element type.
-2. **bucket_size**: specifics the size of the bucket which depends on the size of single item a single bucket is 256KB.
+2. **bucket_size**: specifics the size of the bucket which depends on the size of single item. A single bucket is 256KB.
 
 #### Alias Interface
 

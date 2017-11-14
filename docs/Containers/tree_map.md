@@ -48,25 +48,26 @@ This container is build on `red_black_map` data structure which inherits from `r
    #### Constructor
 
    ```c++
-   red_black_tree(const ComparatorType& compare_function, memory_context_t* context = platform.global_memory);
+   red_black_tree(const ComparatorType& compare_function, 
+                  memory_context_t* context = platform.global_memory);
    red_black_tree(memory_context_t* context = platform.global_memory);
    red_black_tree(std::initializer_list<T> list,
-         const ComparatorType& compare_function = ComparatorType(),
-         memory_context_t* context = platform.global_memory);
+         			const ComparatorType& compare_function = ComparatorType(),
+         			memory_context_t* context = platform.global_memory);
    red_black_map(const red_black_map& other);
    red_black_map(const red_black_map& other,
                   const ComparatorType& compare_function);
    red_black_tree(const red_black_tree& other,
-         memory_context_t* context);
+         			memory_context_t* context);
    red_black_tree(const red_black_tree& other,
-         memory_context_t* context,
-         const ComparatorType& compare_function);
+         			memory_context_t* context,
+         			const ComparatorType& compare_function);
    red_black_map(red_black_map&& other);
    red_black_map(red_black_map&& other, 
-                  const ComparatorType& compare_function);
+                   const ComparatorType& compare_function);
    red_black_tree(red_black_tree&& other, memory_context_t* context);
    red_black_tree(red_black_tree&& other, memory_context_t* context,
-         const ComparatorType& compare_function);
+        			const ComparatorType& compare_function);
    ```
 
    1. A constructor that builds the `red_black_map` a.k.a `tree_map` with the provided function comparison and memory context.
@@ -116,8 +117,6 @@ This container is build on `red_black_map` data structure which inherits from `r
    ```
 
     Removes node of the specified `key`from the tree. 
-
-   ​
 
    #### lookup
 

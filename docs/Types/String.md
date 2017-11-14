@@ -103,7 +103,7 @@ const_iterator begin() const;
 const_iterator cbegin() const;
 ```
 
-Iterator interface of a string which iterates through the runes not the bytes. Returns an iterator to the beginning of the string.
+Iterator interface of a string which iterates through the runes not the bytes. It returns an iterator to the beginning of the string.
 
 #### end
 

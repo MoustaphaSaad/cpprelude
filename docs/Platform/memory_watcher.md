@@ -1,28 +1,28 @@
 #memory_watcher
-A handy tool to watch a memory in a specific scope
+A handy tool to watch a memory in a specific scope.
 
 ##memory_watcher_t
 ```C++
 struct memory_watcher_t;
 ```
-If declared at a scope it will monitor the memory till the end of the scope and at the end if there's some memory that's allocated during the watcher lifetime and not yet freed it will print the name of the watcher and the leaked memory count and size. If there're no leaks detected it will destruct in slience.
+If declared at a scope, it will monitor the memory till the end of the scope. And at the end if there's a memory that's allocated during the watcher lifetime that's not yet freed, it will print the name of the watcher and the leaked memory's count and size. If there're no leak detected, it will be destructed in silence.
 
 ###Interface
 ####Constructor
 ```C++
 memory_watcher_t(const char* scope_name = nullptr);
 ```
-Given a name it constructs a memory watcher.
+Given a name, it constructs a memory watcher.
 ####begin_watching
 ```C++
 void begin_watching();
 ```
-Samples the platform currently alive allocations and its size.
+Samples the platform's alive allocations and its size.
 ####end_watching
 ```C++
 void end_watching();
 ```
-Samples the platform currently alive allocations and its size.
+Samples the platform's alive allocations and its size.
 ####delta_alive_allocations
 ```C++
 usize delta_alive_allocations() const;
@@ -37,4 +37,4 @@ Returns the delta size of allocated memory from the start watching till now.
 ```c++
 void print_report() const;
 ```
-Print the memory report if there're leaked memory. If no leaks exist then it will not print anything.
+Prints the memory report, if there're leaked memory and prints nothing otherwise.

@@ -6,7 +6,7 @@ Allocators can be anything that wrap a `memory_context_t` and provide an access 
 ```C++
 struct arena_t;
 ```
-An arena is a chunk of memory that allocates memory in a stack fashion and it can only free memory if the provided chunk is at the top of the stack. the main philosophy of an arena is that you want to build data structures quickly into the provided container and you will throw it away and reuse the same chunk of memory to build another temp data structures.
+An arena is a chunk of memory that allocates memory in a stack fashion, and it can only free memory if the provided chunk is at the top of the stack. The main philosophy of an arena is that you want to build data structures quickly into the provided container and you will throw it away and reuse the same chunk of memory to build another temp data structures.
 
 ###Interface
 ####Constructor
@@ -32,7 +32,7 @@ Resets the memory and starts to allocate from the beginning.
 template<typename T>
 slice<T> alloc(usize count = 1);
 ```
-Allocates a slice of type T that can accomodate the provided `count`.
+Allocates a slice of type `T  ` that can accommodate the provided `count`.
 
 ####free
 ```C++
@@ -41,7 +41,7 @@ void free(slice<T>& data);
 template<typename T>
 void free(slice<T>&& data);
 ```
-Given a slice memory it frees the provided `data`.
+Given a slice memory, it frees the provided `data`.
 
 ####realloc
 ```C++
@@ -50,5 +50,5 @@ void realloc(slice<T>& data, usize count);
 template<typename T>
 void realloc(slice<T>&& data, usize count);
 ```
-Given a slice of memory it resizes the slice to accomodate to the provided `count`.
+Given a slice of memory, it resizes the slice to accommodate to the provided `count`.
 
