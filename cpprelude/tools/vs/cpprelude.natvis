@@ -154,6 +154,7 @@
   </Type>
 
   <Type Name="cpprelude::hash_array&lt;*&gt;">
+	<AlternativeType Name="cpprelude::hash_set&lt;*&gt;" />
     <DisplayString Condition="_count == 0">empty</DisplayString>
     <DisplayString Condition="_count != 0">{{ count={_count} }}</DisplayString>
     <Expand>
@@ -193,4 +194,40 @@
       </TreeItems>
     </Expand>
   </Type>
+  <!-- By Nora-->
+  <Type Name="cpprelude::quick_find">
+	
+	<DisplayString Condition="_nodes._count == 0"> empty </DisplayString>
+	<DisplayString Condition="_nodes._count != 0">{{ count = {_nodes._count} }}</DisplayString>
+	<Expand>
+      <CustomListItems>
+        <Variable Name="i" InitialValue="0"/>
+        <Loop>
+          <If Condition="i >= _nodes._count">
+            <Break/>
+          </If>
+            <Item Name="group[{i}]"> _nodes[i]</Item>
+          <Exec>i = i + 1</Exec>
+        </Loop>
+      </CustomListItems>
+	</Expand>
+  </Type>
+  
+  <Type Name="cpprelude::quick_union">
+	<DisplayString Condition="_nodes._count == 0"> empty </DisplayString>
+	<DisplayString Condition="_nodes._count != 0">{{ count = {_nodes._count} }} </DisplayString>
+    <Expand>
+      <CustomListItems>
+        <Variable Name="i" InitialValue="0"/>
+        <Loop>
+          <If Condition="i >= _nodes._count">
+            <Break/>
+          </If>
+            <Item Name="group[{i}]"> _nodes[i]</Item>
+          <Exec>i = i + 1</Exec>
+        </Loop>
+      </CustomListItems>
+	</Expand>
+  </Type>
+  
 </AutoVisualizer>
