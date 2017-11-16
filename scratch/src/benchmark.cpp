@@ -49,7 +49,7 @@ cpprelude::arena_t arena(MEGABYTES(100));
 usize
 bm_dynamic_array(workbench* bench, usize limit)
 {
-	memory_watcher_t w("dynamic_array");
+	memory_watcher w("dynamic_array");
 
 	dynamic_array<usize> array;
 	
@@ -65,7 +65,7 @@ bm_dynamic_array(workbench* bench, usize limit)
 usize
 bm_custom_dynamic_array(workbench* bench, usize limit)
 {
-	memory_watcher_t w();
+	memory_watcher w();
 
 	arena.free_all();
 	dynamic_array<usize> array(arena.context());

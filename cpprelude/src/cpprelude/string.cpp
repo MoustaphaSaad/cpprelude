@@ -189,11 +189,11 @@ namespace cpprelude
 	string::string()
 	{}
 
-	string::string(memory_context_t* context)
+	string::string(memory_context* context)
 		:_context(context)
 	{}
 
-	string::string(const char* data, memory_context_t* context)
+	string::string(const char* data, memory_context* context)
 	{
 		_context = context;
 
@@ -205,7 +205,7 @@ namespace cpprelude
 		_data[data_size] = 0;
 	}
 
-	string::string(const slice<byte>& data, memory_context_t* context)
+	string::string(const slice<byte>& data, memory_context* context)
 	{
 		_context = context;
 
@@ -214,7 +214,7 @@ namespace cpprelude
 		copy_slice(_data, data);
 	}
 
-	string::string(slice<byte>&& data, memory_context_t* context)
+	string::string(slice<byte>&& data, memory_context* context)
 	{
 		_context = context;
 		_data = std::move(data);
@@ -231,7 +231,7 @@ namespace cpprelude
 		_count = other._count;
 	}
 
-	string::string(const string& other, memory_context_t* context)
+	string::string(const string& other, memory_context* context)
 	{
 		_context = context;
 
@@ -275,7 +275,7 @@ namespace cpprelude
 		other._context = nullptr;
 	}
 
-	string::string(string&& other, memory_context_t* context)
+	string::string(string&& other, memory_context* context)
 	{
 		_data = std::move(other._data);
 		_count = other._count;

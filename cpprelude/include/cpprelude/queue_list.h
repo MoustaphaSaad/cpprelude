@@ -13,7 +13,7 @@ namespace cpprelude
 
 		dlinked_list<T> _list;
 
-		queue_list(memory_context_t* context = platform.global_memory)
+		queue_list(memory_context* context = platform.global_memory)
 			:_list(context)
 		{}
 
@@ -21,11 +21,11 @@ namespace cpprelude
 
 		queue_list(queue_list&&) = default;
 
-		queue_list(const queue_list& other, memory_context_t* context)
+		queue_list(const queue_list& other, memory_context* context)
 			:_list(other._list, context)
 		{}
 
-		queue_list(queue_list&& other, memory_context_t* context)
+		queue_list(queue_list&& other, memory_context* context)
 			:_list(std::move(other._list), context)
 		{}
 

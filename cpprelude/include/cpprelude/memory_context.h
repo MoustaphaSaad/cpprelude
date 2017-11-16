@@ -5,16 +5,16 @@
 
 namespace cpprelude
 {
-	struct memory_context_t
+	struct memory_context
 	{
-		using alloc_func_t 		= slice<byte>(*)(void*, usize);
-		using realloc_func_t 	= void(*)(void*, slice<byte>&, usize);
-		using free_func_t 		= void(*)(void*, slice<byte>&);
+		using alloc_func 		= slice<byte>(*)(void*, usize);
+		using realloc_func		= void(*)(void*, slice<byte>&, usize);
+		using free_func 		= void(*)(void*, slice<byte>&);
 
 		void* _self = nullptr;
-		alloc_func_t _alloc = nullptr;
-		realloc_func_t _realloc = nullptr;
-		free_func_t _free = nullptr;
+		alloc_func _alloc = nullptr;
+		realloc_func _realloc = nullptr;
+		free_func _free = nullptr;
 
 		template<typename T>
 		slice<T>

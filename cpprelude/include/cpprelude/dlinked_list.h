@@ -26,15 +26,15 @@ namespace cpprelude
 
 		node_type *_head, *_tail;
 		usize _count;
-		memory_context_t *_context = platform.global_memory;
+		memory_context *_context = platform.global_memory;
 
-		dlinked_list(memory_context_t* context = platform.global_memory)
+		dlinked_list(memory_context* context = platform.global_memory)
 			:_head(nullptr), _tail(nullptr), _count(0), _context(context)
 		{
 			_init_sentinels();
 		}
 
-		dlinked_list(std::initializer_list<T> list, memory_context_t* context = platform.global_memory)
+		dlinked_list(std::initializer_list<T> list, memory_context* context = platform.global_memory)
 			:_head(nullptr), _tail(nullptr), _count(0), _context(context)
 		{
 			_init_sentinels();
@@ -43,7 +43,7 @@ namespace cpprelude
 				insert_back(value);
 		}
 
-		dlinked_list(usize count, const T& fill_value, memory_context_t* context = platform.global_memory)
+		dlinked_list(usize count, const T& fill_value, memory_context* context = platform.global_memory)
 			:_head(nullptr), _tail(nullptr), _count(0), _context(context)
 		{
 			_init_sentinels();
@@ -61,7 +61,7 @@ namespace cpprelude
 				insert_back(other_value);
 		}
 
-		dlinked_list(const dlinked_list<T>& other, memory_context_t* context)
+		dlinked_list(const dlinked_list<T>& other, memory_context* context)
 			:_head(nullptr), _tail(nullptr), _count(0), _context(context)
 		{
 			_init_sentinels();
@@ -82,7 +82,7 @@ namespace cpprelude
 			other._context = nullptr;
 		}
 
-		dlinked_list(dlinked_list<T>&& other, memory_context_t* context)
+		dlinked_list(dlinked_list<T>&& other, memory_context* context)
 			:_head(other._head),
 			 _tail(other._tail),
 			 _count(other._count),

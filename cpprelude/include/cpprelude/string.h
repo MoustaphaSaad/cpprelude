@@ -82,16 +82,16 @@ namespace cpprelude
 
 		slice<byte> _data;
 		mutable usize _count = static_cast<usize>(-1);
-		memory_context_t* _context = platform.global_memory;
+		memory_context* _context = platform.global_memory;
 
 		API string();
-		API string(memory_context_t* context);
-		API string(const char* data, memory_context_t* context = platform.global_memory);
-		API string(const slice<byte>& data, memory_context_t* context = platform.global_memory);
-		API string(slice<byte>&& data, memory_context_t* context = platform.global_memory);
+		API string(memory_context* context);
+		API string(const char* data, memory_context* context = platform.global_memory);
+		API string(const slice<byte>& data, memory_context* context = platform.global_memory);
+		API string(slice<byte>&& data, memory_context* context = platform.global_memory);
 
 		API string(const string&);
-		API string(const string&, memory_context_t* context);
+		API string(const string&, memory_context* context);
 
 		API string&
 		operator=(const string&);
@@ -100,7 +100,7 @@ namespace cpprelude
 		operator=(const char* data);
 
 		API string(string&&);
-		API string(string&&, memory_context_t* context);
+		API string(string&&, memory_context* context);
 
 		API string&
 		operator=(string&&);

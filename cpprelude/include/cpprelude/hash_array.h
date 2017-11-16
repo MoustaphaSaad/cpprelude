@@ -241,7 +241,7 @@ namespace cpprelude
 		hash_type _hasher;
 		usize _count;
 
-		hash_array(memory_context_t* context = platform.global_memory)
+		hash_array(memory_context* context = platform.global_memory)
 			:_keys(context), _values(context), _flags(context), _count(0)
 		{
 			constexpr usize starting_count = 256;

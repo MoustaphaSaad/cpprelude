@@ -74,7 +74,7 @@ namespace cpprelude
 		_allocation_head = 0;
 	}
 
-	memory_context_t*
+	memory_context*
 	arena_t::context()
 	{
 		return &_context;

@@ -24,13 +24,13 @@ namespace cpprelude
 
 		slice<T> _data_block;
 		usize _count;
-		memory_context_t *_context;
+		memory_context *_context;
 
-		dynamic_array(memory_context_t* context = platform.global_memory)
+		dynamic_array(memory_context* context = platform.global_memory)
 			:_count(0), _context(context)
 		{}
 
-		dynamic_array(std::initializer_list<T> list, memory_context_t* context = platform.global_memory)
+		dynamic_array(std::initializer_list<T> list, memory_context* context = platform.global_memory)
 			:_count(list.size()), _context(context)
 		{
 			_data_block = _context->template alloc<T>(_count);
@@ -42,11 +42,11 @@ namespace cpprelude
 			}
 		}
 
-		dynamic_array(usize count, memory_context_t* context = platform.global_memory)
+		dynamic_array(usize count, memory_context* context = platform.global_memory)
 			:_count(count), _context(context)
 		{ _data_block = _context->template alloc<T>(count); }
 
-		dynamic_array(usize count, const T& fill_value, memory_context_t* context = platform.global_memory)
+		dynamic_array(usize count, const T& fill_value, memory_context* context = platform.global_memory)
 			:_count(0), _context(context)
 		{
 			expand_back(count, fill_value);
@@ -62,7 +62,7 @@ namespace cpprelude
 				new (&_data_block[i]) T(other._data_block[i]);
 		}
 
-		dynamic_array(const dynamic_array<T>& other, memory_context_t* context)
+		dynamic_array(const dynamic_array<T>& other, memory_context* context)
 			:_count(other._count),
 			 _context(context)
 		{
@@ -81,7 +81,7 @@ namespace cpprelude
 			other._context = nullptr;
 		}
 
-		dynamic_array(dynamic_array<T>&& other, memory_context_t* context)
+		dynamic_array(dynamic_array<T>&& other, memory_context* context)
 			:_count(other._count),
 			 _data_block(std::move(other._data_block)),
 			 _context(context)

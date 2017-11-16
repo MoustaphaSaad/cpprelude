@@ -13,7 +13,7 @@ namespace cpprelude
 
 		slinked_list<T> _list;
 
-		stack_list(memory_context_t* context = platform.global_memory)
+		stack_list(memory_context* context = platform.global_memory)
 			:_list(context)
 		{}
 
@@ -21,11 +21,11 @@ namespace cpprelude
 
 		stack_list(stack_list&&) = default;
 
-		stack_list(const stack_list& other, memory_context_t* context)
+		stack_list(const stack_list& other, memory_context* context)
 			:_list(other._list, context)
 		{}
 
-		stack_list(stack_list&& other, memory_context_t* context)
+		stack_list(stack_list&& other, memory_context* context)
 			:_list(std::move(other), context)
 		{}
 

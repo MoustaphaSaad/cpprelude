@@ -14,7 +14,7 @@ namespace cpprelude
 		using data_type = T;
 		bucket_array<T, buffer_size> _list;
 
-		queue_array(memory_context_t* context = platform.global_memory)
+		queue_array(memory_context* context = platform.global_memory)
 			:_list(context)
 		{}
 

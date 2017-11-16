@@ -10,7 +10,7 @@ namespace cpprelude
 	struct platform_t
 	{
 		//heap_t heap;
-		memory_context_t* global_memory;
+		memory_context* global_memory;
 		usize allocation_count = 0;
 		usize allocation_size = 0;
 		usize RAM_SIZE;

@@ -11,13 +11,13 @@ namespace cpprelude
 	{
 		slice<byte> _memory;
 		usize _allocation_head;
-		memory_context_t _context;
+		memory_context _context;
 		bool _uses_virtual_memory;
 
 		API arena_t(usize size, bool use_virtual_memory = true);
 		API ~arena_t();
 
-		API memory_context_t*
+		API memory_context*
 		context();
 
 		API void

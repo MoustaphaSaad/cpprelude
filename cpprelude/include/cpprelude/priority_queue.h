@@ -15,30 +15,30 @@ namespace cpprelude {
 		usize _count;
 		Comparator _compare;
 
-		priority_queue(Comparator compare_function = Comparator(), memory_context_t* context = platform.global_memory)
+		priority_queue(Comparator compare_function = Comparator(), memory_context* context = platform.global_memory)
 			:_array(context), _count(0), _compare(compare_function)
 		{}
 
-		priority_queue(usize count, Comparator compare_function = Comparator(), memory_context_t* context = platform.global_memory)
+		priority_queue(usize count, Comparator compare_function = Comparator(), memory_context* context = platform.global_memory)
 			:_array(count, context), _count(0), _compare(compare_function)
 		{}
 
-		priority_queue(const priority_queue& other, Comparator compare_function = Comparator(), memory_context_t* context = platform.global_memory)
+		priority_queue(const priority_queue& other, Comparator compare_function = Comparator(), memory_context* context = platform.global_memory)
 			:_array(other._array, context), _count(other._count), _compare(compare_function)
 		{}
 
-		priority_queue(priority_queue&& other, Comparator compare_function, memory_context_t* context)
+		priority_queue(priority_queue&& other, Comparator compare_function, memory_context* context)
 			:_array(std::move(other._array), context), _count(other._count), _compare(compare_function)
 		{}
 
-		priority_queue(std::initializer_list<T> list, Comparator compare_function = Comparator(), memory_context_t* context = platform.global_memory)
+		priority_queue(std::initializer_list<T> list, Comparator compare_function = Comparator(), memory_context* context = platform.global_memory)
 			:_array(list, context), _count(list.size()), _compare(compare_function)
 		{
 			_heapify();
 		}
 
 		template<typename iterator_type>
-		priority_queue(iterator_type it, usize count, Comparator compare_function = Comparator(), memory_context_t* context = platform.global_memory)
+		priority_queue(iterator_type it, usize count, Comparator compare_function = Comparator(), memory_context* context = platform.global_memory)
 			:_array(context), _count(count), _compare(compare_function)
 		{ 
 			_array.reserve(count);
@@ -51,7 +51,7 @@ namespace cpprelude {
 			_heapify();
 		}
 
-		priority_queue(const dynamic_array<T>& arr, Comparator compare_function = Comparator(), memory_context_t* context = platform.global_memory)
+		priority_queue(const dynamic_array<T>& arr, Comparator compare_function = Comparator(), memory_context* context = platform.global_memory)
 			:_array(arr, context), _count(arr.count()), _compare(compare_function)
 		{
 			_heapify();

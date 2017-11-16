@@ -26,13 +26,13 @@ namespace cpprelude
 
 		node_type* _head;
 		usize _count;
-		memory_context_t *_context = platform.global_memory;
+		memory_context *_context = platform.global_memory;
 
-		slinked_list(memory_context_t* context = platform.global_memory)
+		slinked_list(memory_context* context = platform.global_memory)
 			:_head(nullptr), _count(0), _context(context)
 		{}
 
-		slinked_list(std::initializer_list<T> list, memory_context_t* context = platform.global_memory)
+		slinked_list(std::initializer_list<T> list, memory_context* context = platform.global_memory)
 			:_head(nullptr), _count(0), _context(context)
 		{
 			auto it = list.end();
@@ -44,7 +44,7 @@ namespace cpprelude
 			}
 		}
 
-		slinked_list(usize count, const T& fill_value, memory_context_t* context = platform.global_memory)
+		slinked_list(usize count, const T& fill_value, memory_context* context = platform.global_memory)
 			:_head(nullptr), _count(0), _context(context)
 		{
 			for(usize i = 0; i < count; ++i)
@@ -72,7 +72,7 @@ namespace cpprelude
 			}
 		}
 
-		slinked_list(const slinked_list<T>& other, memory_context_t* context)
+		slinked_list(const slinked_list<T>& other, memory_context* context)
 			:_head(nullptr), _count(0), _context(context)
 		{
 			auto* other_it = &other._head;
@@ -103,7 +103,7 @@ namespace cpprelude
 			other._context = nullptr;
 		}
 
-		slinked_list(slinked_list<T>&& other, memory_context_t* context)
+		slinked_list(slinked_list<T>&& other, memory_context* context)
 			:_head(other._head),
 			 _count(other._count),
 			 _context(context)

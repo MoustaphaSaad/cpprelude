@@ -29,16 +29,16 @@ namespace cpprelude
 		using data_type = T;
 
 		map_type _map;
-		memory_context_t *_context = platform.global_memory;
+		memory_context *_context = platform.global_memory;
 		usize _count, _bucket_count;
 		iterator _begin, _end;
 		iterator _cap_begin, _cap_end;
 
-		bucket_array(memory_context_t* context = platform.global_memory)
+		bucket_array(memory_context* context = platform.global_memory)
 			:_map(nullptr), _context(context), _count(0), _bucket_count(0)
 		{ _init(); }
 
-		bucket_array(std::initializer_list<T> list, memory_context_t* context = platform.global_memory)
+		bucket_array(std::initializer_list<T> list, memory_context* context = platform.global_memory)
 			:_map(nullptr), _context(context), _count(0), _bucket_count(0)
 		{
 			_init();
@@ -47,7 +47,7 @@ namespace cpprelude
 				insert_back(std::move(value));
 		}
 
-		bucket_array(usize count, const T& fill_value, memory_context_t* context = platform.global_memory)
+		bucket_array(usize count, const T& fill_value, memory_context* context = platform.global_memory)
 			:_map(nullptr), _context(context), _count(0), _bucket_count(0)
 		{
 			_init();
@@ -65,7 +65,7 @@ namespace cpprelude
 				insert_back(value);
 		}
 
-		bucket_array(const bucket_array& other, memory_context_t* context)
+		bucket_array(const bucket_array& other, memory_context* context)
 			:_map(nullptr), _context(context), _count(0), _bucket_count(0)
 		{
 			_init();
@@ -94,7 +94,7 @@ namespace cpprelude
 			other._context = nullptr;
 		}
 
-		bucket_array(bucket_array&& other, memory_context_t* context)
+		bucket_array(bucket_array&& other, memory_context* context)
 			:_map(other._map),
 			 _context(context),
 			 _count(other._count),

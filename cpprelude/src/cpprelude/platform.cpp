@@ -141,7 +141,7 @@ namespace cpprelude
 	_init_platform()
 	{
 		//declare platform stuff
-		static memory_context_t _global_memory;
+		static memory_context _global_memory;
 		static platform_t _platform;
 
 		//setup the memory
