@@ -86,6 +86,7 @@ namespace cpprelude
 
 		API string();
 		API string(memory_context* context);
+		API explicit string(usize size, memory_context* context = platform.global_memory);
 		API string(const char* data, memory_context* context = platform.global_memory);
 		API string(const slice<byte>& data, memory_context* context = platform.global_memory);
 		API string(slice<byte>&& data, memory_context* context = platform.global_memory);

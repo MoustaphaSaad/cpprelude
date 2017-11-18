@@ -193,6 +193,13 @@ namespace cpprelude
 		:_context(context)
 	{}
 
+	string::string(usize size, memory_context* context)
+		:_context(context)
+	{
+		_data = _context->template alloc<byte>(size);
+		_data[0U] = 0;
+	}
+
 	string::string(const char* data, memory_context* context)
 	{
 		_context = context;
@@ -261,6 +268,8 @@ namespace cpprelude
 		memcpy(_data.ptr, data, data_size);
 
 		_data[data_size] = 0;
+
+		_count = static_cast<usize>(-1);
 
 		return *this;
 	}
@@ -411,7 +420,8 @@ namespace cpprelude
 	operator"" _cs(const char* str, usize str_count)
 	{
 		string result;
-		result._data = make_slice<byte>((byte*)(str), str_count);
+		//the +1 for the 0 null at the end
+		result._data = make_slice<byte>((byte*)(str), str_count + 1);
 		result._context = nullptr;
 		result._count = _count_runes(result._data.ptr);
 		return result;
