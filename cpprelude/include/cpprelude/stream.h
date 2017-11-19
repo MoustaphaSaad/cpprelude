@@ -121,7 +121,8 @@ namespace cpprelude
 	inline static usize
 	write_str(stream_trait* stream, const cpprelude::string& str)
 	{
-		return stream->write(str._data);
+		auto str_view = make_slice(str._data.ptr, str.count());
+		return stream->write(str_view);
 	}
 
 	//memory stream
@@ -184,13 +185,12 @@ namespace cpprelude
 	struct file_stream
 	{
 		FILE* _handle = nullptr;
-		usize _read_head = 0, _write_head = 0;
+		usize _read_head = 0, _write_head = 0, _cursor_position = 0;
 		IO_MODE mode;
 		string name;
 		stream_trait _trait;
 
 		API file_stream();
-		API file_stream(const string& filename, IO_MODE openmode);
 		API ~file_stream();
 
 		file_stream(const file_stream&) = delete;
@@ -220,4 +220,10 @@ namespace cpprelude
 		API bool
 		empty() const;
 	};
+
+	API file_stream
+	open_file(const string& filename, IO_MODE openmode, bool binary = true);
+
+	API file_stream
+	open_file(string&& filename, IO_MODE openmode, bool binary = true);
 }

@@ -174,9 +174,13 @@ namespace cpprelude
 	_file_stream_write(void* _self, const slice<byte>& data)
 	{
 		file_stream* self = reinterpret_cast<file_stream*>(_self);
-		fseek(self->_handle, self->_write_head, SEEK_SET);
+
+		if(self->_cursor_position != self->_write_head)
+			fseek(self->_handle, self->_write_head, SEEK_SET);
+
 		auto result = fwrite(data.ptr, 1, data.size, self->_handle);
 		self->_write_head += result;
+		self->_cursor_position = self->_write_head;
 		return result;
 	}
 
@@ -184,10 +188,12 @@ namespace cpprelude
 	_file_stream_read(void* _self, slice<byte>& data)
 	{
 		file_stream* self = reinterpret_cast<file_stream*>(_self);
-		fseek(self->_handle, self->_read_head, SEEK_SET);
+		if(self->_cursor_position != self->_read_head)
+			fseek(self->_handle, self->_read_head, SEEK_SET);
 
 		auto result = fread(data.ptr, 1, data.size, self->_handle);
 		self->_read_head += result;
+		self->_cursor_position = self->_read_head;
 		return result;
 	}
 
@@ -198,54 +204,19 @@ namespace cpprelude
 		_trait._read = _file_stream_read;
 	}
 
-	file_stream::file_stream(const string& filename, IO_MODE openmode)
-		:name(filename, platform.global_memory), mode(openmode)
-	{
-		_trait._self = this;
-		_trait._write = _file_stream_write;
-		_trait._read = _file_stream_read;
-
-		const char* cmode = nullptr;
-		switch(mode)
-		{
-			case IO_MODE::READ:
-				cmode = "rb";
-				break;
-			case IO_MODE::WRITE:
-				cmode = "wb";
-				break;
-			case IO_MODE::APPEND:
-				cmode = "ab";
-				break;
-			case IO_MODE::READ_EXTENDED:
-				cmode = "rb+";
-				break;
-			case IO_MODE::WRITE_EXTENDED:
-				cmode = "wb+";
-				break;
-			case IO_MODE::APPEND_EXTENDED:
-				cmode = "ab+";
-				break;
-		}
-
-		if(cmode)
-		{
-			auto result = fopen_s(&_handle, filename.data(), cmode);
-			if(result != 0) _handle = nullptr;
-		}
-	}
-
 	file_stream::~file_stream()
 	{
 		if(_handle)
 			fclose(_handle);
 		_read_head = 0;
+		_write_head = 0;
+		_cursor_position = 0;
 	}
 
 	file_stream::file_stream(file_stream&& other)
 		:_handle(other._handle),
 		 _read_head(other._read_head), _write_head(other._write_head),
-		 mode(other.mode), name(other.name), _trait(std::move(other._trait))
+		 mode(other.mode), name(std::move(other.name)), _trait(std::move(other._trait))
 	{
 		_trait._self = this;
 
@@ -264,7 +235,7 @@ namespace cpprelude
 		_read_head = other._read_head;
 		_write_head = other._write_head;
 		mode = other.mode;
-		name = other.name;
+		name = std::move(other.name);
 
 		_trait = std::move(other._trait);
 		_trait._self = this;
@@ -309,5 +280,69 @@ namespace cpprelude
 	file_stream::empty() const
 	{
 		return _write_head == 0;
+	}
+
+	static void
+	_open_file(file_stream& self, bool binary)
+	{
+		const char* cmode = nullptr;
+		
+		switch(self.mode)
+		{
+			case IO_MODE::READ:
+				cmode = binary ? "rb" : "r";
+				break;
+			case IO_MODE::WRITE:
+				cmode = binary ? "wb" : "w";
+				break;
+			case IO_MODE::APPEND:
+				cmode = binary ? "ab" : "a";
+				break;
+			case IO_MODE::READ_EXTENDED:
+				cmode = binary ? "rb+" : "r+";
+				break;
+			case IO_MODE::WRITE_EXTENDED:
+				cmode = binary ? "wb+" : "w+";
+				break;
+			case IO_MODE::APPEND_EXTENDED:
+				cmode = binary ? "ab+" : "a+";
+				break;
+		}
+
+		if(cmode)
+		{
+			auto result = fopen_s(&self._handle, self.name.data(), cmode);
+			if (result == 0)
+			{
+				fflush(self._handle);
+				fpos_t cursor_position;
+				if (fgetpos(self._handle, &cursor_position) == 0)
+				{
+					self._cursor_position = self._write_head = cursor_position;
+				}
+			}
+		}		
+	}
+
+	file_stream
+	open_file(const string& filename, IO_MODE openmode, bool binary)
+	{
+		file_stream self;
+		self.mode = openmode;
+		self.name = filename;
+
+		_open_file(self, binary);
+		return self;
+	}
+
+	file_stream
+	open_file(string&& filename, IO_MODE openmode, bool binary)
+	{
+		file_stream self;
+		self.mode = openmode;
+		self.name = std::move(filename);
+
+		_open_file(self, binary);
+		return self;
 	}
 }

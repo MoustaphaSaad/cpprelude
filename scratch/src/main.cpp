@@ -25,7 +25,7 @@ void file_stuff(stream_trait* stream)
 	result = write_str(stream, -567);
 
 	string xoxo = "my name is mostafa"_cs;
-	result = write(stream, xoxo);
+	result = write_str(stream, xoxo);
 
 	string buffer(KILOBYTES(1));
 	result = read(stream, buffer);
@@ -38,7 +38,7 @@ void space()
 	memory_stream x = std::move(buffer);
 
 	file_stream file;
-	file_stream txt_file("data.txt"_cs, IO_MODE::WRITE_EXTENDED);
+	auto txt_file = open_file("data.txt"_cs, IO_MODE::APPEND_EXTENDED);
 	auto result = txt_file.size();
 	file_stuff(txt_file);
 	result = txt_file.size();
