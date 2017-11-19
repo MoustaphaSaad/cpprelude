@@ -8,9 +8,27 @@
 
 namespace cpprelude
 {
-	//function interface
-	struct stream_trait;
+	//traits
+	struct stream_trait
+	{
+		using write_func = usize(*)(void*, const slice<byte>&);
+		using read_func = usize(*)(void*, slice<byte>&);
 
+		void* _self = nullptr;
+		write_func _write = nullptr;
+		read_func _read = nullptr;
+
+		API usize
+		write(const slice<byte>& data);
+
+		API usize
+		read(slice<byte>& data);
+
+		API usize
+		read(slice<byte>&& data);
+	};
+
+	//function interface
 	template<typename T>
 	inline static usize
 	write(stream_trait* stream, const T& value)
@@ -53,26 +71,6 @@ namespace cpprelude
 	{
 		return read(stream, values);
 	}
-
-	//traits
-	struct stream_trait
-	{
-		using write_func = usize(*)(void*, const slice<byte>&);
-		using read_func = usize(*)(void*, slice<byte>&);
-
-		void* _self = nullptr;
-		write_func _write = nullptr;
-		read_func _read = nullptr;
-
-		API usize
-		write(const slice<byte>& data);
-
-		API usize
-		read(slice<byte>& data);
-
-		API usize
-		read(slice<byte>&& data);
-	};
 
 //implement the string stuff
 #define DEFINE_WRITE_STR(PATTERN, TYPE, BUFFER_SIZE)\
@@ -123,6 +121,63 @@ namespace cpprelude
 	{
 		auto str_view = make_slice(str._data.ptr, str.count());
 		return stream->write(str_view);
+	}
+
+	//raw string stuff
+	inline static usize
+	write_str(stream_trait* stream, const char* str)
+	{
+		auto str_view = make_slice((byte*)str, strlen(str));
+		return stream->write(str_view);
+	}
+
+	//variadic templates for convience
+	inline static usize
+	vwrite(stream_trait* stream)
+	{
+		return 0;
+	}
+
+	template<typename TFirst, typename ... TArgs>
+	inline static usize
+	vwrite(stream_trait* stream, TFirst&& first_arg, TArgs&& ... args)
+	{
+		usize result = 0;
+		result += write(stream, std::forward<TFirst>(first_arg));
+		result += vwrite(stream, std::forward<TArgs>(args)...);
+		return result;
+	}
+
+	inline static usize
+	vwrite_str(stream_trait* stream)
+	{
+		return 0;
+	}
+
+	template<typename TFirst, typename ... TArgs>
+	inline static usize
+	vwrite_str(stream_trait* stream, TFirst&& first_arg, TArgs&& ... args)
+	{
+		usize result = 0;
+		result += write_str(stream, std::forward<TFirst>(first_arg));
+		result += vwrite_str(stream, std::forward<TArgs>(args)...);
+		return result;
+	}
+
+	inline static usize
+	vread(stream_trait* stream)
+	{
+		return 0;
+	}
+
+	template<typename TFirst, typename ... TArgs>
+	inline static usize
+	vread(stream_trait* stream, TFirst&& first_arg, TArgs&& ... args)
+	{
+		usize result = 0;
+		result += read(stream, std::forward<TFirst>(first_arg));
+		result += vread(stream, std::forward<TArgs>(args)...);
+		return result;
 	}
 
 	//memory stream
@@ -213,12 +268,6 @@ namespace cpprelude
 
 		API usize
 		read_position() const;
-
-		API usize
-		read_capacity() const;
-
-		API bool
-		empty() const;
 	};
 
 	API file_stream

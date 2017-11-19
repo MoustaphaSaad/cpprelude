@@ -4,6 +4,17 @@
 #include <sstream>
 using namespace cpprelude;
 
+struct v2
+{
+	float x, y;
+};
+
+inline static usize
+write_str(stream_trait* stream, const v2& value)
+{
+	return vwrite_str(stream, "v2{ "_cs, value.x, ", ", value.y, " };");
+}
+
 void trait(stream_trait* stream)
 {
 	usize result = write(stream, 324);
@@ -21,7 +32,7 @@ void trait(stream_trait* stream)
 
 void file_stuff(stream_trait* stream)
 {
-	usize result = write_str(stream, 123);
+	usize result = vwrite_str(stream, 123);
 	result = write_str(stream, -567);
 
 	string xoxo = "my name is mostafa"_cs;
@@ -29,6 +40,9 @@ void file_stuff(stream_trait* stream)
 
 	string buffer(KILOBYTES(1));
 	result = read(stream, buffer);
+
+	v2 vv{ 1, 23 };
+	result = write_str(stream, vv);
 }
 
 void space()

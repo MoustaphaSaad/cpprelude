@@ -270,18 +270,6 @@ namespace cpprelude
 		return _read_head;
 	}
 
-	usize
-	file_stream::read_capacity() const
-	{
-		return _write_head - _read_head;
-	}
-
-	bool
-	file_stream::empty() const
-	{
-		return _write_head == 0;
-	}
-
 	static void
 	_open_file(file_stream& self, bool binary)
 	{
