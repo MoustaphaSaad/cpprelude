@@ -47,7 +47,7 @@ namespace cpprelude
 	inline static usize
 	write_str(stream_trait* stream, const T& value)
 	{
-		static_assert(false, "[write_str]: is not implemented for this type");
+		static_assert(sizeof(T) == 0, "[write_str]: is not implemented for this type");
 		return 0;
 	}
 

@@ -1,5 +1,7 @@
 #include "cpprelude/stream.h"
+#include "cpprelude/memory.h"
 #include <algorithm>
+#include <cstdio>
 
 namespace cpprelude
 {
@@ -43,7 +45,7 @@ namespace cpprelude
 		}
 
 		//success we just need to copy the data into the buffer
-		copy_slice(self->_data.view(self->size()), data, data.size);
+		copy_slice<byte>(self->_data.view(self->size()), data, data.size);
 		self->_write_head += data.size;
 		return data.size;
 	}
@@ -305,21 +307,14 @@ namespace cpprelude
 			case IO_MODE::APPEND_EXTENDED:
 				cmode = binary ? "ab+" : "a+";
 				break;
+			default:
+			case IO_MODE::NONE:
+				cmode = nullptr;
+				break;
 		}
 
 		if(cmode)
-		{
-			auto result = fopen_s(&self._handle, self.name.data(), cmode);
-			if (result == 0)
-			{
-				fflush(self._handle);
-				fpos_t cursor_position;
-				if (fgetpos(self._handle, &cursor_position) == 0)
-				{
-					self._cursor_position = self._write_head = cursor_position;
-				}
-			}
-		}		
+			self._handle = std::fopen(self.name.data(), cmode);
 	}
 
 	file_stream

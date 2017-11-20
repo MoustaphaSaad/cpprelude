@@ -142,11 +142,25 @@ namespace cpprelude
 
 	template<typename T>
 	void
+	copy_slice(slice<T>&& dst, const slice<T>& src, usize count = 0)
+	{
+		copy_slice(dst, src, count);
+	}
+
+	template<typename T>
+	void
 	move_slice(slice<T>& dst, slice<T>& src, usize count = 0)
 	{
 		if(count == 0)
 			count = src.count();
 		
 		std::memmove(dst.ptr, src.ptr, count * sizeof(T));
+	}
+
+	template<typename T>
+	void
+	move_slice(slice<T>&& dst, slice<T>& src, usize count = 0)
+	{
+		move_slice(dst, src, count);
 	}
 }

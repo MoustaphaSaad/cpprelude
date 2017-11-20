@@ -54,50 +54,55 @@ TEST_CASE("file_stream test", "[file_stream]")
 {
 	SECTION("Case 01")
 	{
-		file_stream stream = open_file("file_stream"_cs, IO_MODE::WRITE);
+		{
+			file_stream stream = open_file("file_stream01"_cs, IO_MODE::WRITE);
 
-		REQUIRE(stream.valid() == true);
-		CHECK(stream.size() == 0);
-		CHECK(stream.read_position() == 0);
-		remove("file_stream");
+			REQUIRE(stream.valid() == true);
+			CHECK(stream.size() == 0);
+			CHECK(stream.read_position() == 0);
+		}
+		remove("file_stream01");
 	}
 
 	SECTION("Case 02")
 	{
-		file_stream stream = open_file("file_stream"_cs, IO_MODE::WRITE_EXTENDED);
-		REQUIRE(stream.valid() == true);
+		{
+			file_stream stream = open_file("file_stream02"_cs, IO_MODE::WRITE_EXTENDED);
+			REQUIRE(stream.valid() == true);
 
-		int x = 0;
-		CHECK(write(stream, x) == sizeof(int));
-		CHECK(write_str(stream, x) == 1);
+			int x = 0;
+			CHECK(write(stream, x) == sizeof(int));
+			CHECK(write_str(stream, x) == 1);
 
-		CHECK(stream.size() >= 5);
+			CHECK(stream.size() >= 5);
 
-		auto buffer = platform.alloc<byte>(4);
-		CHECK(read(stream, buffer) == 4);
-		platform.free(buffer);
+			auto buffer = platform.alloc<byte>(4);
+			CHECK(read(stream, buffer) == 4);
+			platform.free(buffer);
 
-		CHECK(stream.read_position() == 4);
+			CHECK(stream.read_position() == 4);
+		}
 
-		remove("file_stream");
+		remove("file_stream02");
 	}
 
 	SECTION("Case 03")
 	{
-		file_stream stream = open_file("file_stream"_cs, IO_MODE::WRITE_EXTENDED);
-		REQUIRE(stream.valid() == true);
+		{
+			file_stream stream = open_file("file_stream03"_cs, IO_MODE::WRITE_EXTENDED);
+			REQUIRE(stream.valid() == true);
 
-		CHECK(write_str(stream, -123) > 0);
+			CHECK(write_str(stream, -123) > 0);
 
-		file_stream other_stream = std::move(stream);
-		CHECK(other_stream.valid() == true);
-		CHECK(stream.valid() == false);
+			file_stream other_stream = std::move(stream);
+			CHECK(other_stream.valid() == true);
+			CHECK(stream.valid() == false);
 
-		CHECK(other_stream._trait._self == &other_stream);
+			CHECK(other_stream._trait._self == &other_stream);
 
-		CHECK(other_stream.size() >= 4);
-		CHECK(other_stream.read_position() == 0);
-		
-		remove("file_stream");
+			CHECK(other_stream.size() >= 4);
+			CHECK(other_stream.read_position() == 0);
+		}
+		remove("file_stream03");
 	}
 }
