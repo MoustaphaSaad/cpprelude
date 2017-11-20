@@ -229,7 +229,19 @@ namespace cpprelude
 
 		API slice<byte>
 		decay_continuous();
+
+		API string
+		string_decay();
 	};
+
+	template<typename ... TArgs>
+	inline static string
+	concat(TArgs&& ... args)
+	{
+		memory_stream result;
+		vwrite_str(result, std::forward<TArgs>(args)...);
+		return result.string_decay();
+	}
 
 	enum class IO_MODE
 	{

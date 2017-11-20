@@ -169,6 +169,16 @@ namespace cpprelude
 		return decay();
 	}
 
+	string
+	memory_stream::string_decay()
+	{
+		_context->template realloc<byte>(_data, _write_head + 1);
+		_data[_write_head] = 0;
+		_read_head = 0;
+		_write_head = 0;
+		return string(std::move(_data));
+	}
+
 	//file stream
 	static usize
 	_file_stream_write(void* _self, const slice<byte>& data)
