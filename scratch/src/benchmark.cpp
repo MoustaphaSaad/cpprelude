@@ -29,6 +29,7 @@
 #include <cpprelude/string.h>
 #include <string>
 #include <sstream>
+#include <cpprelude/stream.h>
 
 #include <cpprelude/hash_array.h>
 #include <unordered_map>
@@ -1023,6 +1024,41 @@ bm_custom_string_create(workbench* bench, usize limit)
 	return str;
 }
 
+std::string
+bm_std_stream(workbench* bench, usize limit)
+{
+	usize arr_size = (rand() % 1000) + 1000;
+	char* arr = new char[arr_size];
+	gen_random(arr, arr_size - 1);
+	std::string arr_str(arr, arr_size);
+
+	bench->watch.start();
+	std::stringstream str;
+	str << arr_str;
+	bench->watch.stop();
+
+	delete[] arr;
+	return str.str();
+}
+
+usize
+bm_stream(workbench* bench, usize limit)
+{
+	usize arr_size = (rand() % 1000) + 1000;
+	char* arr = new char[arr_size];
+	gen_random(arr, arr_size - 1);
+	auto arr_slice = make_slice(arr, arr_size);
+	string arr_str(arr_slice);
+
+	bench->watch.start();
+	memory_stream str;
+	write_str(str, arr_str);
+	bench->watch.stop();
+
+	delete[] arr;
+	return str.size();
+}
+
 void
 do_benchmark()
 {
@@ -1131,6 +1167,11 @@ do_benchmark()
 		CPPRELUDE_BENCHMARK(bm_std_string_create, limit),
 		CPPRELUDE_BENCHMARK(bm_string_create, limit),
 		CPPRELUDE_BENCHMARK(bm_custom_string_create, limit)
+	});
+
+	compare_benchmark(std::cout, {
+		CPPRELUDE_BENCHMARK(bm_std_stream, limit),
+		CPPRELUDE_BENCHMARK(bm_stream, limit)
 	});
 
 	std::cout << std::endl;
