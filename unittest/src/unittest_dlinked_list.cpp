@@ -216,12 +216,12 @@ TEST_CASE("dlinked_list test", "[dlinked_list]")
 		while(count--)
 		{
 			CHECK(*it == i++);
-			it = next(it);
+			it = cpprelude::next(it);
 		}
 
 		CHECK(it == array.end());
-		it = next(it);
-		it = next(it);
+		it = cpprelude::next(it);
+		it = cpprelude::next(it);
 		CHECK(it == array.end());
 		CHECK(array.begin() != array.end());
 	}
@@ -476,19 +476,19 @@ TEST_CASE("dlinked_list test", "[dlinked_list]")
 
 		auto it = array.begin();
 		CHECK(it == array.begin());
-		it = next(it);
+		it = cpprelude:: next(it);
 		CHECK(it != array.begin());
-		it = prev(it);
+		it = cpprelude::prev(it);
 		CHECK(it == array.begin());
 
-		it = next(it);
-		it = next(it);
-		it = next(it);
+		it = cpprelude::next(it);
+		it = cpprelude::next(it);
+		it = cpprelude::next(it);
 		CHECK(it != array.begin());
-		it = next(it);
-		it = next(it);
-		it = next(it);
-		it = next(it);
+		it = cpprelude::next(it);
+		it = cpprelude::next(it);
+		it = cpprelude::next(it);
+		it = cpprelude::next(it);
 		CHECK(it == array.end());
 	}
 

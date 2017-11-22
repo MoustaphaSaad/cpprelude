@@ -24,40 +24,40 @@ namespace cpprelude
 	}
 
 	slice<byte>
-	platform_t::virtual_alloc(void* address_hint, usize size)
+		platform_t::virtual_alloc(void* address_hint, usize size)
 	{
-		if(size == 0)
+		if (size == 0)
 			return slice<byte>();
 
 		void* result = nullptr;
 
-		#if defined(OS_WINDOWS)
-			result = VirtualAlloc(address_hint, size, MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
-		#elif defined(OS_LINUX)
-			result = mmap(address_hint, size, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
-		#endif
+#if defined(OS_WINDOWS)
+		result = VirtualAlloc(address_hint, size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+#elif defined(OS_LINUX)
+		result = mmap(address_hint, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+#endif
 
 		return make_slice(reinterpret_cast<byte*>(result), size);
 	}
 
 	bool
-	platform_t::virtual_free(slice<byte>& data)
+		platform_t::virtual_free(slice<byte>& data)
 	{
-		#if defined(OS_WINDOWS)
-			return VirtualFree(data.ptr, 0, MEM_RELEASE) != NULL;
-		#elif defined(OS_LINUX)
-			return munmap(data.ptr, data.size) == 0;
-		#endif
+#if defined(OS_WINDOWS)
+		return VirtualFree(data.ptr, 0, MEM_RELEASE) != NULL;
+#elif defined(OS_LINUX)
+		return munmap(data.ptr, data.size) == 0;
+#endif
 	}
 
 	bool
-	platform_t::virtual_free(slice<byte>&& data)
+		platform_t::virtual_free(slice<byte>&& data)
 	{
 		return virtual_free(data);
 	}
 
 	void
-	platform_t::print_memory_report() const
+		platform_t::print_memory_report() const
 	{
 #ifdef DEBUG
 		println(std::cout,
@@ -67,7 +67,7 @@ namespace cpprelude
 	}
 
 	slice<byte>
-	_default_alloc(void*, usize count)
+		_default_alloc(void*, usize count)
 	{
 		using T = byte;
 		if (count == 0)
@@ -83,7 +83,7 @@ namespace cpprelude
 	}
 
 	void
-	_default_free(void*, slice<byte>& slice_)
+		_default_free(void*, slice<byte>& slice_)
 	{
 		if (slice_.ptr != nullptr)
 		{
@@ -99,7 +99,7 @@ namespace cpprelude
 	}
 
 	void
-	_default_realloc(void* self, slice<byte>& slice_, usize count)
+		_default_realloc(void* self, slice<byte>& slice_, usize count)
 	{
 		using T = byte;
 		if (count == 0)
@@ -118,27 +118,27 @@ namespace cpprelude
 	}
 
 	usize
-	_get_ram_size()
+		_get_ram_size()
 	{
 		usize totalram = 0;
-		#if defined(OS_LINUX)
+#if defined(OS_LINUX)
 		{
 			struct sysinfo info;
 			sysinfo(&info);
 			totalram = std::max<usize>(GIGABYTES(4) - 1ULL, (info.totalram * 1024ULL));
 		}
-		#elif defined(OS_WINDOWS)
+#elif defined(OS_WINDOWS)
 		{
 			ULONGLONG result = 0; //size of physical memory in kilobytes
 			GetPhysicallyInstalledSystemMemory(&result);
 			totalram = std::max<usize>(GIGABYTES(4) - 1ULL, (result * 1024ULL));
 		}
-		#endif
+#endif
 		return totalram;
 	}
 
 	platform_t&
-	_init_platform()
+		_init_platform()
 	{
 		//declare platform stuff
 		static memory_context _global_memory;
@@ -157,10 +157,10 @@ namespace cpprelude
 		_platform.RAM_SIZE = _get_ram_size();
 
 		//windows setup stuff
-		#if defined(OS_WINDOWS)
-			//set the console mode to support utf8
-			SetConsoleOutputCP(CP_UTF8);
-		#endif
+#if defined(OS_WINDOWS)
+		//set the console mode to support utf8
+		SetConsoleOutputCP(CP_UTF8);
+#endif
 
 		//return the created platform
 		return _platform;
@@ -172,20 +172,20 @@ namespace cpprelude
 	namespace helper
 	{
 		inline static std::mutex&
-		print_lock()
+			print_lock()
 		{
 			static std::mutex _print_lock;
 			return _print_lock;
 		}
 
 		void
-		__acquire_print_lock()
+			__acquire_print_lock()
 		{
 			print_lock().lock();
 		}
 
 		void
-		__release_print_lock()
+			__release_print_lock()
 		{
 			print_lock().unlock();
 		}

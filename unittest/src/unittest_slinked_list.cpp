@@ -220,12 +220,12 @@ TEST_CASE("slinked_list test", "[slinked_list]")
 		while(count--)
 		{
 			CHECK(*it == i++);
-			it = next(it);
+			it = cpprelude::next(it);
 		}
 
 		CHECK(it == array.end());
-		it = next(it);
-		it = next(it);
+		it = cpprelude::next(it);
+		it = cpprelude::next(it);
 		CHECK(it == array.end());
 		CHECK(array.begin() != array.end());
 	}

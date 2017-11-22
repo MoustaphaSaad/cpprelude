@@ -1,0 +1,15 @@
+﻿#include "benchmark.h"
+
+int
+<<<<<<< HEAD
+mainc(int argc, char** argv)
+{
+	do_benchmark();
+
+=======
+main(int argc, char** argv)
+{
+	do_benchmark();
+>>>>>>> master
+	return 0;
+}
