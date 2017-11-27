@@ -4,10 +4,13 @@
 #include "cpprelude/api.h"
 #include "cpprelude/memory.h"
 #include "cpprelude/memory_context.h"
+#include "cpprelude/file.h"
 #include "cpprelude/heap.h"
 
 namespace cpprelude
 {
+	struct string;
+
 	struct platform_t
 	{
 		//heap_t heap;
@@ -64,6 +67,12 @@ namespace cpprelude
 
 		API_CPPR void
 		print_memory_report() const;
+
+		API_CPPR file_handle
+		open_file(const string& filename);
+
+		API_CPPR file_handle
+		open_file(string&& filename);
 	};
 
 	API_CPPR extern platform_t& platform;

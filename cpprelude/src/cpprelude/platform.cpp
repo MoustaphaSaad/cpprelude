@@ -1,4 +1,5 @@
 #include "cpprelude/platform.h"
+#include "cpprelude/string.h"
 #include <mutex>
 #include <algorithm>
 #include <iostream>
@@ -66,6 +67,50 @@ namespace cpprelude
 #endif
 	}
 
+	file_handle
+	platform_t::open_file(const string& filename)
+	{
+		file_handle handle;
+		#if defined(OS_WINDOWS)
+		{
+			//WinAPI doesn't play nice with utf-8 strings so i have to convert to utf-16 string
+			constexpr i32 buffer_size = KILOBYTES(2);
+			WCHAR utf16_buffer[buffer_size];
+			auto size_needed = MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED, filename.data(), filename.size(), NULL, 0);
+			LPWSTR win_filename;
+			//i use small buffer to optimise for the common cases
+			if (size_needed > buffer_size)
+				win_filename = platform.template alloc<WCHAR>(size_needed);
+			else
+				win_filename = utf16_buffer;
+			MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED, filename.data(), filename.size(), win_filename, size_needed);
+
+			handle._win_handle = CreateFile(win_filename,
+				GENERIC_READ,
+				FILE_SHARE_READ,
+				NULL,
+				CREATE_NEW,
+				FILE_ATTRIBUTE_NORMAL,
+				NULL);
+
+			if (size_needed > buffer_size)
+				platform.free(make_slice(win_filename, size_needed));
+		}
+		#elif defined(OS_LINUX)
+		{
+
+		}
+		#endif
+		return handle;
+	}
+
+	file_handle
+	platform_t::open_file(string&& filename)
+	{
+		return open_file(filename);
+	}
+
+	//private functions
 	slice<byte>
 	_default_alloc(void*, usize count)
 	{
