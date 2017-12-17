@@ -18,6 +18,9 @@ project "scratch"
 		buildoptions {"-std=c++14", "-Wall", "-fno-rtti", "-fno-exceptions"}
 		linkoptions {"-pthread"}
 
+		filter "configurations:debug"
+			linkoptions {"-rdynamic"}
+
 	elseif os.istarget("windows") then
 		
 		if os.getversion().majorversion == 10.0 then

@@ -13,6 +13,9 @@ project "cpprelude"
 		buildoptions {"-std=c++14", "-Wall", "-fno-rtti", "-fno-exceptions"}
 		linkoptions {"-pthread"}
 
+		filter "configurations:debug"
+			linkoptions {"-rdynamic"}
+
 	elseif os.istarget("windows") then
 
 		if os.getversion().majorversion == 10.0 then
@@ -23,6 +26,9 @@ project "cpprelude"
 
 		filter "action:vs*"
 			files {"tools/vs/cpprelude.natvis"}
+
+		filter "configurations:debug"
+			links {"dbghelp"}
 	end
 
 	filter "configurations:debug"

@@ -4,12 +4,23 @@
 #include "cpprelude/api.h"
 #include "cpprelude/memory.h"
 #include "cpprelude/memory_context.h"
-#include "cpprelude/file.h"
+#include "cpprelude/file_defs.h"
 #include "cpprelude/heap.h"
+#include "cpprelude/result.h"
+
+#include <iostream>
 
 namespace cpprelude
 {
 	struct string;
+
+	enum class PLATFORM_ERROR
+	{
+		OK,
+		GENERIC_ERROR,
+		FILE_ALREADY_EXISTS,
+		FILE_DOESNOT_EXIST
+	};
 
 	struct platform_t
 	{
@@ -18,6 +29,7 @@ namespace cpprelude
 		usize allocation_count = 0;
 		usize allocation_size = 0;
 		usize RAM_SIZE;
+		bool debug_configured = false;
 
 		~platform_t();
 
@@ -68,11 +80,46 @@ namespace cpprelude
 		API_CPPR void
 		print_memory_report() const;
 
-		API_CPPR file_handle
-		open_file(const string& filename);
+		API_CPPR void
+		dump_callstack() const;
 
-		API_CPPR file_handle
-		open_file(string&& filename);
+		API_CPPR result<file_handle, PLATFORM_ERROR>
+		open_file(const string& filename,
+			IO_MODE2 io_mode = IO_MODE2::READ_WRITE,
+			OPEN_MODE open_mode = OPEN_MODE::CREATE_OVERWRITE);
+
+		API_CPPR bool
+		close_file(file_handle& handle);
+
+		API_CPPR bool
+		close_file(file_handle&& handle);
+
+		API_CPPR bool
+		valid_file(const file_handle& handle);
+
+		API_CPPR usize
+		write_file(const file_handle& handle, const slice<byte>& data);
+
+		API_CPPR usize
+		read_file(const file_handle& handle, slice<byte>& data);
+
+		API_CPPR usize
+		read_file(const file_handle& handle, slice<byte>&& data);
+
+		API_CPPR i64
+		file_size(const file_handle& handle);
+
+		API_CPPR i64
+		file_cursor(const file_handle& handle);
+
+		API_CPPR bool
+		file_move(const file_handle& handle, i64 offset);
+
+		API_CPPR bool
+		file_move_to_start(const file_handle& handle);
+
+		API_CPPR bool
+		file_move_to_end(const file_handle& handle);
 	};
 
 	API_CPPR extern platform_t& platform;

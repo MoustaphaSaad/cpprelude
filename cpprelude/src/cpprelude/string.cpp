@@ -229,13 +229,23 @@ namespace cpprelude
 
 	string::string(const string& other)
 	{
-		_context = other._context;
+		//if the context is nullptr it means that it's a constant string
+		if(other._context)
+		{
+			_context = other._context;
 
-		_data = _context->template alloc<byte>(other._data.size);
+			_data = _context->template alloc<byte>(other._data.size);
 
-		copy_slice(_data, other._data);
+			copy_slice(_data, other._data);
 
-		_count = other._count;
+			_count = other._count;
+		}
+		else
+		{
+			_data = other._data;
+			_count = other._count;
+			_context = other._context;
+		}
 	}
 
 	string::string(const string& other, memory_context* context)
@@ -252,10 +262,19 @@ namespace cpprelude
 	string&
 	string::operator=(const string& other)
 	{
-		_context = other._context;
-		_context->template realloc<byte>(_data, other._data.size);
-		copy_slice(_data, other._data);
-		_count = other._count;
+		if (other._context)
+		{
+			_context = other._context;
+			_context->template realloc<byte>(_data, other._data.size);
+			copy_slice(_data, other._data);
+			_count = other._count;
+		}
+		else
+		{
+			_context = other._context;
+			_data = other._data;
+			_count = other._count;
+		}
 		return *this;
 	}
 
