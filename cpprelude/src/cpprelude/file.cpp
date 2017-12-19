@@ -10,7 +10,7 @@ namespace cpprelude
 	{
 		file* self = reinterpret_cast<file*>(_self);
 
-		return platform.write_file(self->handle, data);
+		return platform.file_write(self->handle, data);
 	}
 
 	usize
@@ -18,7 +18,7 @@ namespace cpprelude
 	{
 		file* self = reinterpret_cast<file*>(_self);
 
-		return platform.read_file(self->handle, data);
+		return platform.file_read(self->handle, data);
 	}
 
 	file::file()
@@ -36,8 +36,11 @@ namespace cpprelude
 
 	file::file(file&& other)
 		:handle(std::move(other.handle)),
-		 name(std::move(other.name))
+		 name(std::move(other.name)),
+		 _io_trait(std::move(other._io_trait))
 	{
+		_io_trait._self = this;
+
 		#if defined(OS_WINDOWS)
 			other.handle._win_handle = nullptr;
 		#elif defined(OS_LINUX)
@@ -50,6 +53,8 @@ namespace cpprelude
 	{
 		handle = std::move(other.handle);
 		name = std::move(other.name);
+		_io_trait = std::move(other._io_trait);
+		_io_trait._self = this;
 
 		#if defined(OS_WINDOWS)
 			other.handle._win_handle = nullptr;
@@ -62,19 +67,14 @@ namespace cpprelude
 
 	file::~file()
 	{
-		if(platform.valid_file(handle))
-			platform.close_file(handle);
-	}
-
-	file::operator io_trait*()
-	{
-		return &_io_trait;
+		if(platform.file_valid(handle))
+			platform.file_close(handle);
 	}
 
 	bool
 	file::valid() const
 	{
-		return platform.valid_file(handle);
+		return platform.file_valid(handle);
 	}
 
 	i64
@@ -108,23 +108,23 @@ namespace cpprelude
 	}
 
 	file
-	file::open(const string& name, IO_MODE2 io_mode, OPEN_MODE open_mode)
+	file::open(const string& name, IO_MODE io_mode, OPEN_MODE open_mode)
 	{
 		file out;
 		out.name = name;
-		out.handle = check(platform.open_file(out.name, io_mode, open_mode), "file failed to open"_cs);
+		out.handle = check(platform.file_open(out.name, io_mode, open_mode), "file failed to open"_cs);
 		return out;
 	}
 
 	bool
 	file::close(file& self)
 	{
-		return platform.close_file(self.handle);
+		return platform.file_close(self.handle);
 	}
 
 	bool
 	file::close(file&& self)
 	{
-		return platform.close_file(self.handle);
+		return platform.file_close(self.handle);
 	}
 }

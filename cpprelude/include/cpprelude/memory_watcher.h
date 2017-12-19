@@ -2,7 +2,6 @@
 
 #include "cpprelude/defines.h"
 #include "cpprelude/api.h"
-#include "cpprelude/platform.h"
 
 namespace cpprelude
 {

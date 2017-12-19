@@ -1,4 +1,7 @@
 #include "cpprelude/memory_watcher.h"
+#include "cpprelude/io.h"
+#include "cpprelude/platform.h"
+#include "cpprelude/string.h"
 
 namespace cpprelude
 {
@@ -49,7 +52,7 @@ namespace cpprelude
 	{
 		if(delta_alive_allocations() != 0)
 		{
-			println(std::cout, "memory_watcher ", name,
+			println_err("memory_watcher ", name,
 					"{alive allocations: ", delta_alive_allocations(),
 					", size: ", delta_size(), "}");
 		}

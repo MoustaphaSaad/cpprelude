@@ -8,8 +8,6 @@
 #include "cpprelude/heap.h"
 #include "cpprelude/result.h"
 
-#include <iostream>
-
 namespace cpprelude
 {
 	struct string;
@@ -84,27 +82,27 @@ namespace cpprelude
 		dump_callstack() const;
 
 		API_CPPR result<file_handle, PLATFORM_ERROR>
-		open_file(const string& filename,
-			IO_MODE2 io_mode = IO_MODE2::READ_WRITE,
+		file_open(const string& filename,
+			IO_MODE io_mode = IO_MODE::READ_WRITE,
 			OPEN_MODE open_mode = OPEN_MODE::CREATE_OVERWRITE);
 
 		API_CPPR bool
-		close_file(file_handle& handle);
+		file_close(file_handle& handle);
 
 		API_CPPR bool
-		close_file(file_handle&& handle);
+		file_close(file_handle&& handle);
 
 		API_CPPR bool
-		valid_file(const file_handle& handle);
+		file_valid(const file_handle& handle);
 
 		API_CPPR usize
-		write_file(const file_handle& handle, const slice<byte>& data);
+		file_write(const file_handle& handle, const slice<byte>& data);
 
 		API_CPPR usize
-		read_file(const file_handle& handle, slice<byte>& data);
+		file_read(const file_handle& handle, slice<byte>& data);
 
 		API_CPPR usize
-		read_file(const file_handle& handle, slice<byte>&& data);
+		file_read(const file_handle& handle, slice<byte>&& data);
 
 		API_CPPR i64
 		file_size(const file_handle& handle);
@@ -123,46 +121,4 @@ namespace cpprelude
 	};
 
 	API_CPPR extern platform_t& platform;
-
-	//print stuff
-
-	namespace helper
-	{
-		API_CPPR void
-		__acquire_print_lock();
-
-		API_CPPR void
-		__release_print_lock();
-
-		template<typename TStream>
-		inline static void
-		_print(TStream& out)
-		{}
-
-		template<typename TStream, typename TFirst, typename ... TArgs>
-		inline static void
-		_print(TStream& out, TFirst&& arg, TArgs&& ... args)
-		{
-			out << arg;
-			_print(out, std::forward<TArgs>(args)...);
-		}
-	}
-
-	template<typename TStream, typename ... TArgs>
-	inline static void
-	print(TStream& out, TArgs&& ... args)
-	{
-		helper::__acquire_print_lock();
-		helper::_print(out, std::forward<TArgs>(args)...);
-		helper::__release_print_lock();
-	}
-
-	template<typename TStream, typename ... TArgs>
-	inline static void
-	println(TStream& out, TArgs&& ... args)
-	{
-		helper::__acquire_print_lock();
-		helper::_print(out, std::forward<TArgs>(args)..., "\n");
-		helper::__release_print_lock();
-	}
 }

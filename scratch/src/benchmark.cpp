@@ -1052,7 +1052,7 @@ bm_stream(workbench* bench, usize limit)
 
 	bench->watch.start();
 	memory_stream str;
-	write_str(str, arr_str);
+	vprints(str, arr_str);
 	bench->watch.stop();
 
 	delete[] arr;
@@ -1168,6 +1168,8 @@ do_benchmark()
 		CPPRELUDE_BENCHMARK(bm_string_create, limit),
 		CPPRELUDE_BENCHMARK(bm_custom_string_create, limit)
 	});
+
+	std::cout << std::endl << std::endl;
 
 	compare_benchmark(std::cout, {
 		CPPRELUDE_BENCHMARK(bm_std_stream, limit),

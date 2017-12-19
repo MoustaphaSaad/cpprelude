@@ -28,7 +28,11 @@ namespace cpprelude
 
 		API_CPPR ~file();
 
-		operator io_trait*();
+		inline
+		operator io_trait*()
+		{
+			return &_io_trait;
+		}
 
 		API_CPPR bool
 		valid() const;
@@ -50,7 +54,7 @@ namespace cpprelude
 
 		API_CPPR static file
 		open(const string& name,
-			 IO_MODE2 io_mode = IO_MODE2::READ_WRITE,
+			 IO_MODE io_mode = IO_MODE::READ_WRITE,
 			 OPEN_MODE open_mode = OPEN_MODE::CREATE_OVERWRITE);
 
 		API_CPPR static bool

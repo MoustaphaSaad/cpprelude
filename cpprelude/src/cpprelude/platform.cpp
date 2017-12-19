@@ -1,8 +1,7 @@
 #include "cpprelude/platform.h"
 #include "cpprelude/string.h"
-#include <mutex>
+#include "cpprelude/io.h"
 #include <algorithm>
-#include <iostream>
 
 #if defined(OS_WINDOWS)
 #include <Windows.h>
@@ -82,8 +81,7 @@ namespace cpprelude
 	platform_t::print_memory_report() const
 	{
 #ifdef DEBUG
-		println(std::cout,
-			"allocation count = ", allocation_count, "\n",
+		println_err("allocation count = ", allocation_count, "\n",
 			"allocation size = ", allocation_size);
 #endif
 	}
@@ -117,9 +115,9 @@ namespace cpprelude
 			for (usize i = 0; i < frames_count; ++i)
 			{
 				if (SymFromAddr(process_handle, (DWORD64)(callstack[i]), NULL, symbol))
-					println(std::cerr, "[", frames_count - i - 1, "]: ", symbol->Name);
+					println_err("[", frames_count - i - 1, "]: ", symbol->Name);
 				else
-					println(std::cerr, "[", frames_count - i - 1, "]: ", "unknown symbol");
+					println_err("[", frames_count - i - 1, "]: ", "unknown symbol");
 			}
 		}
 		#elif defined(OS_LINUX)
@@ -157,7 +155,7 @@ namespace cpprelude
 					//function maybe inlined
 					if(mangled_name_size == 0)
 					{
-						println(std::cerr, "[", frames_count - i - 1, "]: unknown/inlined symbol");
+						println_err("[", frames_count - i - 1, "]: unknown/inlined symbol");
 						continue;
 					}
 
@@ -171,12 +169,12 @@ namespace cpprelude
 					if(status == 0)
 					{
 						auto function_name = string(make_slice(demangled_buffer, demangled_buffer_length), nullptr);
-						println(std::cerr, "[", frames_count - i - 1, "]: ", function_name);
+						println_err("[", frames_count - i - 1, "]: ", function_name);
 					}
 					else
 					{
 						auto function_name = string(make_slice(name_buffer, copy_size), nullptr);
-						println(std::cerr, "[", frames_count - i - 1, "]: ", function_name);
+						println_err("[", frames_count - i - 1, "]: ", function_name);
 					}
 				}
 				::free(symbols);
@@ -188,7 +186,7 @@ namespace cpprelude
 	}
 
 	result<file_handle, PLATFORM_ERROR>
-	platform_t::open_file(const string& filename, IO_MODE2 io_mode, OPEN_MODE open_mode)
+	platform_t::file_open(const string& filename, IO_MODE io_mode, OPEN_MODE open_mode)
 	{
 		file_handle handle;
 		#if defined(OS_WINDOWS)
@@ -197,15 +195,15 @@ namespace cpprelude
 			DWORD desired_access;
 			switch(io_mode)
 			{
-				case IO_MODE2::READ:
+				case IO_MODE::READ:
 					desired_access = GENERIC_READ;
 					break;
 
-				case IO_MODE2::WRITE:
+				case IO_MODE::WRITE:
 					desired_access = GENERIC_WRITE;
 					break;
 
-				case IO_MODE2::READ_WRITE:
+				case IO_MODE::READ_WRITE:
 				default:
 					desired_access = GENERIC_READ | GENERIC_WRITE;
 					break;
@@ -296,15 +294,15 @@ namespace cpprelude
 			//translate the io mode
 			switch(io_mode)
 			{
-				case IO_MODE2::READ:
+				case IO_MODE::READ:
 					flags |= O_RDONLY;
 					break;
 
-				case IO_MODE2::WRITE:
+				case IO_MODE::WRITE:
 					flags |= O_WRONLY;
 					break;
 
-				case IO_MODE2::READ_WRITE:
+				case IO_MODE::READ_WRITE:
 				default:
 					flags |= O_RDWR;
 					break;
@@ -359,7 +357,7 @@ namespace cpprelude
 	}
 
 	bool
-	platform_t::valid_file(const file_handle& handle)
+	platform_t::file_valid(const file_handle& handle)
 	{
 		#if defined(OS_WINDOWS)
 			return handle._win_handle != nullptr;
@@ -369,7 +367,7 @@ namespace cpprelude
 	}
 
 	bool
-	platform_t::close_file(file_handle& handle)
+	platform_t::file_close(file_handle& handle)
 	{
 		#if defined(OS_WINDOWS)
 		{
@@ -389,13 +387,13 @@ namespace cpprelude
 	}
 
 	bool
-	platform_t::close_file(file_handle&& handle)
+	platform_t::file_close(file_handle&& handle)
 	{
-		return close_file(handle);
+		return file_close(handle);
 	}
 
 	usize
-	platform_t::write_file(const file_handle& handle, const slice<byte>& data)
+	platform_t::file_write(const file_handle& handle, const slice<byte>& data)
 	{
 		#if defined(OS_WINDOWS)
 		{
@@ -411,7 +409,7 @@ namespace cpprelude
 	}
 
 	usize
-	platform_t::read_file(const file_handle& handle, slice<byte>& data)
+	platform_t::file_read(const file_handle& handle, slice<byte>& data)
 	{
 		#if defined(OS_WINDOWS)
 		{
@@ -427,9 +425,9 @@ namespace cpprelude
 	}
 
 	usize
-	platform_t::read_file(const file_handle& handle, slice<byte>&& data)
+	platform_t::file_read(const file_handle& handle, slice<byte>&& data)
 	{
-		return read_file(handle, data);
+		return file_read(handle, data);
 	}
 
 	i64
@@ -489,7 +487,7 @@ namespace cpprelude
 		#elif defined(OS_LINUX)
 		{
 			off64_t offset = move_offset;
-			return lseek64(handle._linux_handle, offset, SEEK_CUR);
+			return lseek64(handle._linux_handle, offset, SEEK_CUR) != -1;
 		}
 		#endif
 	}
@@ -506,7 +504,7 @@ namespace cpprelude
 		#elif defined(OS_LINUX)
 		{
 			off64_t offset = 0;
-			return lseek64(handle._linux_handle, offset, SEEK_SET);
+			return lseek64(handle._linux_handle, offset, SEEK_SET) != -1;
 		}
 		#endif
 	}
@@ -523,7 +521,7 @@ namespace cpprelude
 		#elif defined(OS_LINUX)
 		{
 			off64_t offset = 0;
-			return lseek64(handle._linux_handle, offset, SEEK_END);
+			return lseek64(handle._linux_handle, offset, SEEK_END) != -1;
 		}
 		#endif
 	}
@@ -639,27 +637,4 @@ namespace cpprelude
 	}
 
 	platform_t& platform = _init_platform();
-
-	//print stuff
-	namespace helper
-	{
-		inline static std::mutex&
-		print_lock()
-		{
-			static std::mutex _print_lock;
-			return _print_lock;
-		}
-
-		void
-		__acquire_print_lock()
-		{
-			print_lock().lock();
-		}
-
-		void
-		__release_print_lock()
-		{
-			print_lock().unlock();
-		}
-	}
 }

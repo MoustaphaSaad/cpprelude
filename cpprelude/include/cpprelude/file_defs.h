@@ -13,7 +13,7 @@ namespace cpprelude
 		OPEN_APPEND			//opens the file it it exists and append to its content. if it doesn't exist it fails.
 	};
 
-	enum class IO_MODE2
+	enum class IO_MODE
 	{
 		READ,		//only performs reads to the file
 		WRITE,		//only performs writes to the file
