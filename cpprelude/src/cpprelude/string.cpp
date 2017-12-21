@@ -3,6 +3,10 @@
 
 namespace cpprelude
 {
+	rune::rune()
+		:data(0)
+	{}
+	
 	rune::rune(char c)
 		:data(c)
 	{}
