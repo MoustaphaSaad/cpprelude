@@ -6,8 +6,8 @@ namespace cpprelude
 	rune::rune()
 		:data(0)
 	{}
-	
-	rune::rune(char c)
+
+	rune::rune(u32 c)
 		:data(c)
 	{}
 
@@ -131,7 +131,7 @@ namespace cpprelude
 	rune_iterator::operator*() const
 	{
 		if (_ptr == nullptr || *_ptr == 0)
-			return rune{ 0 };
+			return rune(0);
 
 		const byte* ptr = _ptr;
 

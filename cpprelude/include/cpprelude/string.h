@@ -23,7 +23,7 @@ namespace cpprelude
 
 		API_CPPR rune();
 
-		API_CPPR rune(char c);
+		API_CPPR rune(u32 c);
 
 		API_CPPR bool
 		operator==(const rune& other) const;
