@@ -21,6 +21,8 @@ namespace cpprelude
 	{
 		u32 data;
 
+		API_CPPR rune(char c);
+
 		API_CPPR bool
 		operator==(const rune& other) const;
 

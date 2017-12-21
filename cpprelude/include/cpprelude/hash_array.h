@@ -221,6 +221,16 @@ namespace cpprelude
 		}
 	};
 
+	template<>
+	struct hash<rune>
+	{
+		inline usize
+		operator()(rune value) const
+		{
+			return value.data;
+		}
+	}
+
 	template<typename keyType,
 			 typename valueType,
 			 typename hashType = hash<keyType>>

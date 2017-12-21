@@ -3,6 +3,10 @@
 
 namespace cpprelude
 {
+	rune::rune(char c)
+		:data(c)
+	{}
+
 	bool
 	rune::operator==(const rune& other) const
 	{
