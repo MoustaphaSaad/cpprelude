@@ -229,7 +229,7 @@ namespace cpprelude
 		{
 			return value.data;
 		}
-	}
+	};
 
 	template<typename keyType,
 			 typename valueType,
