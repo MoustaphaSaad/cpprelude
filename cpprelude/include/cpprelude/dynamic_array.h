@@ -107,7 +107,7 @@ namespace cpprelude
 		dynamic_array<T>&
 		operator=(const dynamic_array<T>& other)
 		{
-			slice<T> tmp_data_block = _context->template alloc<T>(other._data_block.count());
+			slice<T> tmp_data_block = other._context->template alloc<T>(other._data_block.count());
 			for(usize i = 0; i < other._count; ++i)
 				new (&tmp_data_block[i]) T(other._data_block[i]);
 

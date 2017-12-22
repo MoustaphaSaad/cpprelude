@@ -525,7 +525,7 @@ namespace cpprelude
 		slice<node_type>
 		decay()
 		{
-			slice<node_type> result(_head);
+			slice<node_type> result(_head, sizeof(node_type));
 
 			_head = nullptr;
 			_tail = nullptr;
