@@ -262,6 +262,14 @@ namespace cpprelude
 			_flags.expand_back(starting_count, 0);
 		}
 
+		hash_array(const hash_array& other, memory_context *context)
+			:_keys(other._keys, context),
+			 _values(other._values, context),
+			 _flags(other._flags, context),
+			 _hasher(other._hasher),
+			 _count(other._count)
+		{}
+
 		iterator
 		insert(const key_type& key)
 		{
