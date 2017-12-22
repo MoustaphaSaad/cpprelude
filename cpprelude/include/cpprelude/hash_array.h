@@ -270,6 +270,16 @@ namespace cpprelude
 			 _count(other._count)
 		{}
 
+		hash_array(hash_array&& other, memory_context *context)
+			:_keys(std::move(other._keys), context),
+			 _values(std::move(other._values), context),
+			 _flags(std::move(other._flags), context),
+			 _hasher(std::move(other._hasher)),
+			 _count(other._count)
+		{
+			other._count = 0;
+		}
+
 		iterator
 		insert(const key_type& key)
 		{
