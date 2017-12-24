@@ -21,6 +21,12 @@ namespace cpprelude
 		API_CPPR memory_context*
 		context();
 
+		inline
+		operator memory_context*()
+		{
+			return &_context;
+		}
+
 		API_CPPR void
 		free_all();
 
