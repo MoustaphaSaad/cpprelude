@@ -7,6 +7,7 @@
 #include <iostream>
 #include <new>
 #include <cstring>
+#include <algorithm>
 
 namespace cpprelude
 {
@@ -135,7 +136,7 @@ namespace cpprelude
 	copy_slice(slice<T>& dst, const slice<T>& src, usize count = 0)
 	{
 		if(count == 0)
-			count = src.count();
+			count = std::min(src.count(), dst.count());
 		
 		std::memcpy(dst.ptr, src.ptr, count * sizeof(T));
 	}
@@ -152,7 +153,7 @@ namespace cpprelude
 	move_slice(slice<T>& dst, slice<T>& src, usize count = 0)
 	{
 		if(count == 0)
-			count = src.count();
+			count = std::min(src.count(), dst.count());
 		
 		std::memmove(dst.ptr, src.ptr, count * sizeof(T));
 	}

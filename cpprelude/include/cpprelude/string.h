@@ -4,13 +4,26 @@
 #include "cpprelude/api.h"
 #include "cpprelude/memory.h"
 #include "cpprelude/platform.h"
-#include <ostream>
+#include "cpprelude/io.h"
 
 namespace cpprelude
 {
+	inline static usize
+	_strlen(const byte *it, usize limit = -1)
+	{
+		usize result = 0;
+		while(*it++ != 0 && result < limit)
+			++result;
+		return result;
+	}
+
 	struct rune
 	{
 		u32 data;
+
+		API_CPPR rune();
+
+		API_CPPR rune(u32 c);
 
 		API_CPPR bool
 		operator==(const rune& other) const;
@@ -31,18 +44,12 @@ namespace cpprelude
 		operator>=(const rune& other) const;
 	};
 
-	inline static std::ostream&
-	operator<<(std::ostream& out,const rune& c)
+	inline static usize
+	print_str(io_trait *trait, const rune &c)
 	{
-		out << reinterpret_cast<const char*>(&c.data);
-		return out;
-	}
-
-	inline static std::wostream&
-	operator<<(std::wostream& out, const rune& c)
-	{
-		out << reinterpret_cast<const char*>(&c.data);
-		return out;
+		byte *ptr = (byte*)(&c);
+		usize size = _strlen(ptr);
+		return trait->write(make_slice<byte>(ptr, size));
 	}
 
 	struct rune_iterator
@@ -160,17 +167,63 @@ namespace cpprelude
 	API_CPPR cpprelude::string
 	operator"" _cs(const char* str, usize str_count);
 
-	inline static std::ostream&
-	operator<<(std::ostream& out,const cpprelude::string& str)
+	inline static usize
+	print_bin(io_trait *trait, const cpprelude::string& str)
 	{
-		out << reinterpret_cast<const char*>(str._data.ptr);
-		return out;
+		//remove the last null from the string when printing it
+		byte *ptr = str._data.ptr;
+		usize size = _strlen(ptr, str._data.size);
+
+		return trait->write(make_slice<byte>(ptr, size));
 	}
 
-	inline static std::wostream&
-	operator<<(std::wostream& out, const cpprelude::string& str)
+	inline static usize
+	print_bin(io_trait *trait, const char* str)
 	{
-		out << reinterpret_cast<const char*>(str._data.ptr);
-		return out;
+		return trait->write(make_slice((byte*)str, _strlen(str)));
+	}
+
+	inline static usize
+	print_str(io_trait *trait, const cpprelude::string& str)
+	{
+		//remove the last null from the string when printing it
+		byte *ptr = str._data.ptr;
+		usize size = _strlen(ptr, str._data.size);
+
+		return trait->write(make_slice<byte>(ptr, size));
+	}
+
+	inline static usize
+	print_str(io_trait *trait, const char* str)
+	{
+		return trait->write(make_slice((byte*)str, _strlen(str)));
+	}
+
+	inline static usize
+	read_bin(io_trait *trait, cpprelude::string& str)
+	{
+		auto result = trait->read(str._data.view_bytes(0, str._data.size - 1));
+		str._data[result] = 0;
+		return result ;
+	}
+
+	inline static usize
+	read_bin(io_trait *trait, cpprelude::string&& str)
+	{
+		return read_bin(trait, str);
+	}
+
+	inline static usize
+	read_str(io_trait *trait, cpprelude::string& str)
+	{
+		auto result = trait->read(str._data.view_bytes(0, str._data.size - 1));
+		str._data[result] = 0;
+		return result;
+	}
+
+	inline static usize
+	read_str(io_trait *trait, cpprelude::string&& str)
+	{
+		return read_bin(trait, str);
 	}
 }

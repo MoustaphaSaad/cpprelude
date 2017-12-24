@@ -1,5 +1,7 @@
 #include "catch.hpp"
 #include <cpprelude/stream.h>
+#include <cpprelude/file.h>
+#include <cpprelude/io.h>
 #include <cpprelude/string.h>
 #include <stdio.h>
 
@@ -12,9 +14,8 @@ TEST_CASE("memory_stream test", "[memory_stream]")
 		memory_stream stream;
 
 		CHECK(stream.size() == 0);
+		CHECK(stream.cursor() == 0);
 		CHECK(stream.capacity() == 0);
-		CHECK(stream.write_capacity() == 0);
-		CHECK(stream.read_position() == 0);
 		CHECK(stream.empty() == true);
 	}
 
@@ -22,31 +23,45 @@ TEST_CASE("memory_stream test", "[memory_stream]")
 	{
 		memory_stream stream;
 
-		int x = 0;
-		CHECK(write(stream, x) == sizeof(int));
-		CHECK(write_str(stream, x) == 1);
+		int x = 7;
+		CHECK(vprintb(stream, x) == sizeof(int));
+		CHECK(vprints(stream, x) == 1);
 
 		CHECK(stream.size() >= 5);
 		CHECK(stream.capacity() >= 5);
 		CHECK(stream.empty() == false);
 
-		auto buffer = platform.alloc<byte>(4);
-		CHECK(read(stream, buffer) == 4);
-		platform.free(buffer);
+		CHECK(stream.cursor() == 5);
+		CHECK(stream.move(-1));
+		CHECK(stream.cursor() == 4);
 
-		CHECK(stream.read_position() == 4);
+		char c;
+		CHECK(vreadb(stream, c) == 1);
+		CHECK(c == '7');
+
+		CHECK(stream.cursor() == 5);
+		CHECK(stream.move_to_start());
+		CHECK(stream.cursor() == 0);
+
+		int y = 1;
+		CHECK(vreadb(stream, y) == sizeof(int));
+		CHECK(y == x);
+
+		CHECK(stream.cursor() == 4);
+		CHECK(stream.move_to_end());
+		CHECK(stream.cursor() == 5);
 	}
 
 	SECTION("Case 03")
 	{
 		memory_stream stream;
 
-		CHECK(write_str(stream, -123) > 0);
+		CHECK(vprints(stream, -213) == 4);
+
 		memory_stream other_stream = std::move(stream);
-		CHECK(other_stream._trait._self == &other_stream);
 		CHECK(other_stream.size() >= 4);
 		CHECK(other_stream.capacity() >= 4);
-		CHECK(other_stream.read_capacity() == 4);
+		CHECK(other_stream.cursor() == 4);
 	}
 }
 
@@ -55,54 +70,64 @@ TEST_CASE("file_stream test", "[file_stream]")
 	SECTION("Case 01")
 	{
 		{
-			file_stream stream = open_file("file_stream01"_cs, IO_MODE::WRITE);
-
+			file stream = file::open("file_stream"_cs, IO_MODE::WRITE);
 			REQUIRE(stream.valid() == true);
+
 			CHECK(stream.size() == 0);
-			CHECK(stream.read_position() == 0);
+			CHECK(stream.cursor() == 0);
 		}
-		remove("file_stream01");
+		remove("file_stream");
 	}
 
 	SECTION("Case 02")
 	{
 		{
-			file_stream stream = open_file("file_stream02"_cs, IO_MODE::WRITE_EXTENDED);
+			file stream = file::open("file_stream"_cs, IO_MODE::READ_WRITE);
 			REQUIRE(stream.valid() == true);
 
-			int x = 0;
-			CHECK(write(stream, x) == sizeof(int));
-			CHECK(write_str(stream, x) == 1);
+			int x = 6;
+			CHECK(vprintb(stream, x) == sizeof(int));
+			CHECK(vprints(stream, x) == 1);
 
 			CHECK(stream.size() >= 5);
+			CHECK(stream.cursor() == 5);
 
-			auto buffer = platform.alloc<byte>(4);
-			CHECK(read(stream, buffer) == 4);
-			platform.free(buffer);
+			char c;
+			CHECK(stream.move(-1));
+			CHECK(stream.cursor() == 4);
 
-			CHECK(stream.read_position() == 4);
+			CHECK(vreadb(stream, c) == 1);
+			CHECK(c == '6');
+
+			CHECK(stream.cursor() == 5);
+
+			CHECK(stream.move_to_start());
+			CHECK(stream.cursor() == 0);
+
+			int y = 1;
+			CHECK(vreadb(stream, y) == sizeof(int));
+
+			CHECK(y == x);
+
+			CHECK(stream.cursor() == 4);
+			CHECK(stream.move_to_end());
+			CHECK(stream.cursor() == 5);
 		}
 
-		remove("file_stream02");
+		remove("file_stream");
 	}
 
 	SECTION("Case 03")
 	{
 		{
-			file_stream stream = open_file("file_stream03"_cs, IO_MODE::WRITE_EXTENDED);
-			REQUIRE(stream.valid() == true);
+			file stream = file::open("file_stream"_cs, IO_MODE::WRITE);
 
-			CHECK(write_str(stream, -123) > 0);
+			CHECK(vprints(stream, -213) == 4);
 
-			file_stream other_stream = std::move(stream);
-			CHECK(other_stream.valid() == true);
-			CHECK(stream.valid() == false);
-
-			CHECK(other_stream._trait._self == &other_stream);
-
+			file other_stream = std::move(stream);
 			CHECK(other_stream.size() >= 4);
-			CHECK(other_stream.read_position() == 0);
+			CHECK(other_stream.cursor() == 4);
 		}
-		remove("file_stream03");
+		remove("file_stream");
 	}
 }
