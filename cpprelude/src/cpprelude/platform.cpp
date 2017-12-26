@@ -1,6 +1,7 @@
 #include "cpprelude/platform.h"
 #include "cpprelude/string.h"
 #include "cpprelude/io.h"
+#include "cpprelude/fmt.h"
 #include <algorithm>
 
 #if defined(OS_WINDOWS)
@@ -243,7 +244,7 @@ namespace cpprelude
 			LPWSTR win_filename;
 			//i use small buffer to optimise for the common cases
 			if (size_needed > buffer_size)
-				win_filename = platform.template alloc<WCHAR>(size_needed);
+				win_filename = this->template alloc<WCHAR>(size_needed);
 			else
 				win_filename = utf16_buffer;
 			MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED, filename.data(), filename.size(), win_filename, size_needed);
@@ -257,7 +258,7 @@ namespace cpprelude
 				NULL);
 
 			if (size_needed > buffer_size)
-				platform.free(make_slice(win_filename, size_needed));
+				this->free(make_slice(win_filename, size_needed));
 			
 			if (handle._win_handle == INVALID_HANDLE_VALUE)
 			{
@@ -536,8 +537,8 @@ namespace cpprelude
 		T* ptr = reinterpret_cast<T*>(std::malloc(count * sizeof(T)));
 
 #ifdef DEBUG
-		++platform.allocation_count;
-		platform.allocation_size += count * sizeof(T);
+		++platform->allocation_count;
+		platform->allocation_size += count * sizeof(T);
 #endif
 
 		return slice<T>(ptr, ptr ? count * sizeof(T) : 0);
@@ -549,8 +550,8 @@ namespace cpprelude
 		if (slice_.ptr != nullptr)
 		{
 #ifdef DEBUG
-			--platform.allocation_count;
-			platform.allocation_size -= slice_.size;
+			--platform->allocation_count;
+			platform->allocation_size -= slice_.size;
 #endif
 			std::free(slice_.ptr);
 		}
@@ -570,8 +571,8 @@ namespace cpprelude
 		}
 
 #ifdef DEBUG
-		platform.allocation_size += (count * sizeof(T)) - slice_.size;
-		if (!slice_.valid()) ++platform.allocation_count;
+		platform->allocation_size += (count * sizeof(T)) - slice_.size;
+		if (!slice_.valid()) ++platform->allocation_count;
 #endif
 
 		slice_.ptr = reinterpret_cast<T*>(std::realloc(slice_.ptr, count * sizeof(T)));
@@ -598,12 +599,16 @@ namespace cpprelude
 		return totalram;
 	}
 
-	platform_t&
-	_init_platform()
+	platform_t*
+	_actual_init_platform()
 	{
 		//declare platform stuff
 		static memory_context _global_memory;
 		static platform_t _platform;
+		static bool _is_initialized = false;
+
+		if(_is_initialized)
+			return &_platform;
 
 		//setup the memory
 		_global_memory._self = &_platform;
@@ -632,9 +637,16 @@ namespace cpprelude
 			#endif
 		#endif
 
+		_is_initialized = true;
 		//return the created platform
-		return _platform;
+		return &_platform;
 	}
 
-	platform_t& platform = _init_platform();
+	platform_t* platform = _actual_init_platform();
+
+	void
+	_init_platform()
+	{
+		platform = _actual_init_platform();
+	}
 }

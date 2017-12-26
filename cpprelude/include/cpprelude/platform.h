@@ -120,5 +120,8 @@ namespace cpprelude
 		file_move_to_end(const file_handle& handle);
 	};
 
-	API_CPPR extern platform_t& platform;
+	API_CPPR void
+	_init_platform();
+	
+	API_CPPR extern platform_t* platform;
 }

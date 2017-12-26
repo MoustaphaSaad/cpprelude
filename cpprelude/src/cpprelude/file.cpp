@@ -10,7 +10,7 @@ namespace cpprelude
 	{
 		file* self = reinterpret_cast<file*>(_self);
 
-		return platform.file_write(self->handle, data);
+		return platform->file_write(self->handle, data);
 	}
 
 	usize
@@ -18,7 +18,7 @@ namespace cpprelude
 	{
 		file* self = reinterpret_cast<file*>(_self);
 
-		return platform.file_read(self->handle, data);
+		return platform->file_read(self->handle, data);
 	}
 
 	file::file()
@@ -67,44 +67,62 @@ namespace cpprelude
 
 	file::~file()
 	{
-		if(platform.file_valid(handle))
-			platform.file_close(handle);
+		if(platform->file_valid(handle))
+			platform->file_close(handle);
 	}
 
 	bool
 	file::valid() const
 	{
-		return platform.file_valid(handle);
+		return platform->file_valid(handle);
 	}
 
 	i64
 	file::size() const
 	{
-		return platform.file_size(handle);
+		return platform->file_size(handle);
 	}
 
 	i64
 	file::cursor() const
 	{
-		return platform.file_cursor(handle);
+		return platform->file_cursor(handle);
 	}
 
 	bool
 	file::move(i64 offset)
 	{
-		return platform.file_move(handle, offset);
+		return platform->file_move(handle, offset);
 	}
 
 	bool
 	file::move_to_start()
 	{
-		return platform.file_move_to_start(handle);
+		return platform->file_move_to_start(handle);
 	}
 
 	bool
 	file::move_to_end()
 	{
-		return platform.file_move_to_end(handle);
+		return platform->file_move_to_end(handle);
+	}
+
+	usize
+	file::write(const slice<byte>& data)
+	{
+		return _default_file_write(this, data);
+	}
+
+	usize
+	file::read(slice<byte>& data)
+	{
+		return _default_file_read(this, data);
+	}
+
+	usize
+	file::read(slice<byte>&& data)
+	{
+		return _default_file_read(this, data);
 	}
 
 	file
@@ -112,19 +130,19 @@ namespace cpprelude
 	{
 		file out;
 		out.name = name;
-		out.handle = check(platform.file_open(out.name, io_mode, open_mode), "file failed to open"_cs);
+		out.handle = check(platform->file_open(out.name, io_mode, open_mode), "file failed to open"_cs);
 		return out;
 	}
 
 	bool
 	file::close(file& self)
 	{
-		return platform.file_close(self.handle);
+		return platform->file_close(self.handle);
 	}
 
 	bool
 	file::close(file&& self)
 	{
-		return platform.file_close(self.handle);
+		return platform->file_close(self.handle);
 	}
 }

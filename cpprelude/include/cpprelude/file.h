@@ -52,6 +52,15 @@ namespace cpprelude
 		API_CPPR bool
 		move_to_end();
 
+		API_CPPR usize
+		write(const slice<byte>& data);
+
+		API_CPPR usize
+		read(slice<byte>& data);
+
+		API_CPPR usize
+		read(slice<byte>&& data);
+
 		API_CPPR static file
 		open(const string& name,
 			 IO_MODE io_mode = IO_MODE::READ_WRITE,

@@ -27,21 +27,21 @@ namespace cpprelude
 
 		node_type *_root;
 		usize _count;
-		memory_context *_context = platform.global_memory;
+		memory_context *_context = platform->global_memory;
 		ComparatorType _less_than;
 
-		red_black_tree(const ComparatorType& compare_function, memory_context* context = platform.global_memory)
+		red_black_tree(const ComparatorType& compare_function, memory_context* context = platform->global_memory)
 			:_root(nullptr), _count(0), _context(context),
 			 _less_than(compare_function)
 		{}
 
-		red_black_tree(memory_context* context = platform.global_memory)
+		red_black_tree(memory_context* context = platform->global_memory)
 			:_root(nullptr), _count(0), _context(context)
 		{}
 
 		red_black_tree(std::initializer_list<T> list,
 			const ComparatorType& compare_function = ComparatorType(),
-			memory_context* context = platform.global_memory)
+			memory_context* context = platform->global_memory)
 			:_root(nullptr), _count(0), _context(context), _less_than(compare_function)
 		{
 			auto it = list.begin();
@@ -887,17 +887,17 @@ namespace cpprelude
 		using color_type = typename node_type::color_type;
 		using _implementation = red_black_tree<data_type, ComparatorType>;
 
-		red_black_map(memory_context* context = platform.global_memory)
+		red_black_map(memory_context* context = platform->global_memory)
 			:_implementation(context)
 		{}
 
-		red_black_map(const ComparatorType& compare_function, memory_context* context = platform.global_memory)
+		red_black_map(const ComparatorType& compare_function, memory_context* context = platform->global_memory)
 			:_implementation(compare_function, context)
 		{}
 
 		red_black_map(std::initializer_list<data_type> list,
 			const ComparatorType& compare_function = ComparatorType(),
-			memory_context* context = platform.global_memory)
+			memory_context* context = platform->global_memory)
 			:_implementation(list, compare_function, context)
 		{}
 

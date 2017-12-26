@@ -13,7 +13,7 @@ namespace cpprelude
 
 		slinked_list<T> _list;
 
-		stack_list(memory_context* context = platform.global_memory)
+		stack_list(memory_context* context = platform->global_memory)
 			:_list(context)
 		{}
 

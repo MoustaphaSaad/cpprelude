@@ -26,13 +26,13 @@ namespace cpprelude
 
 		node_type* _head;
 		usize _count;
-		memory_context *_context = platform.global_memory;
+		memory_context *_context = platform->global_memory;
 
-		slinked_list(memory_context* context = platform.global_memory)
+		slinked_list(memory_context* context = platform->global_memory)
 			:_head(nullptr), _count(0), _context(context)
 		{}
 
-		slinked_list(std::initializer_list<T> list, memory_context* context = platform.global_memory)
+		slinked_list(std::initializer_list<T> list, memory_context* context = platform->global_memory)
 			:_head(nullptr), _count(0), _context(context)
 		{
 			auto it = list.end();
@@ -44,7 +44,7 @@ namespace cpprelude
 			}
 		}
 
-		slinked_list(usize count, const T& fill_value, memory_context* context = platform.global_memory)
+		slinked_list(usize count, const T& fill_value, memory_context* context = platform->global_memory)
 			:_head(nullptr), _count(0), _context(context)
 		{
 			for(usize i = 0; i < count; ++i)

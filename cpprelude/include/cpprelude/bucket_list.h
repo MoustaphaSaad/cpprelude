@@ -14,10 +14,10 @@ namespace cpprelude
 		using data_type = T;
 		
 		slice<T> _memory;
-		memory_context *_context = platform.global_memory;
+		memory_context *_context = platform->global_memory;
 		bucket_list* _next;
 
-		bucket_list(memory_context *context = platform.global_memory)
+		bucket_list(memory_context *context = platform->global_memory)
 			:_context(context), _next(nullptr)
 		{
 			_memory = _context->template alloc<T>(bucket_size);

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "cpprelude/defines.h"
-// #include "cpprelude/platform.h"
 
 #include <cstdlib>
 #include <iostream>

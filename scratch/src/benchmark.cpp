@@ -30,6 +30,7 @@
 #include <string>
 #include <sstream>
 #include <cpprelude/stream.h>
+#include <cpprelude/fmt.h>
 
 #include <cpprelude/hash_array.h>
 #include <unordered_map>

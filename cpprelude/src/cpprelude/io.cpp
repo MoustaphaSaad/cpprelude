@@ -34,7 +34,7 @@ namespace cpprelude
 	{
 		file_handle* handle = reinterpret_cast<file_handle*>(self);
 
-		return platform.file_write(*handle, data);
+		return platform->file_write(*handle, data);
 	}
 
 	usize
@@ -42,7 +42,7 @@ namespace cpprelude
 	{
 		file_handle* handle = reinterpret_cast<file_handle*>(self);
 
-		return platform.file_read(*handle, data);
+		return platform->file_read(*handle, data);
 	}
 
 	usize
@@ -63,7 +63,12 @@ namespace cpprelude
 	io_trait*
 	_init_stdout()
 	{
+		static io_trait _stdout;
 		static file_handle _stdout_handle;
+		static bool _is_initialized = false;
+
+		if(_is_initialized)
+			return &_stdout;
 
 		#if defined(OS_WINDOWS)
 		{
@@ -75,10 +80,11 @@ namespace cpprelude
 		}
 		#endif
 
-		static io_trait _stdout;
 		_stdout._self = &_stdout_handle;
 		_stdout._write = _write_std_handle;
 		_stdout._read = _panic_read_handle;
+
+		_is_initialized = true;
 
 		return &_stdout;
 	}
@@ -86,7 +92,12 @@ namespace cpprelude
 	io_trait*
 	_init_stderr()
 	{
+		static io_trait _stderr;
 		static file_handle _stderr_handle;
+		static bool _is_initialized = false;
+
+		if(_is_initialized)
+			return &_stderr;
 
 		#if defined(OS_WINDOWS)
 		{
@@ -98,10 +109,11 @@ namespace cpprelude
 		}
 		#endif
 
-		static io_trait _stderr;
 		_stderr._self = &_stderr_handle;
 		_stderr._write = _write_std_handle;
 		_stderr._read = _panic_read_handle;
+
+		_is_initialized = true;
 
 		return &_stderr;
 	}
@@ -109,7 +121,12 @@ namespace cpprelude
 	io_trait*
 	_init_stdin()
 	{
+		static io_trait _stdin;
 		static file_handle _stdin_handle;
+		static bool _is_initialized = false;
+
+		if(_is_initialized)
+			return &_stdin;
 
 		#if defined(OS_WINDOWS)
 		{
@@ -121,10 +138,11 @@ namespace cpprelude
 		}
 		#endif
 
-		static io_trait _stdin;
 		_stdin._self = &_stdin_handle;
 		_stdin._write = _panic_write_handle;
 		_stdin._read = _read_std_handle;
+
+		_is_initialized = true;
 
 		return &_stdin;
 	}
@@ -133,17 +151,12 @@ namespace cpprelude
 	io_trait* cppr_err = _init_stderr();
 	io_trait* cppr_in  = _init_stdin();
 
-	static std::mutex _print_lock;
-
+	//make sure std io is initialized
 	void
-	_acquire_print_lock()
+	_init_stdio()
 	{
-		_print_lock.lock();
-	}
-
-	void
-	_release_print_lock()
-	{
-		_print_lock.unlock();
+		cppr_out = _init_stdout();
+		cppr_in = _init_stdin();
+		cppr_err = _init_stderr();
 	}
 }

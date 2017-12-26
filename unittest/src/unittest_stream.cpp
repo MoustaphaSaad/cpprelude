@@ -2,6 +2,7 @@
 #include <cpprelude/stream.h>
 #include <cpprelude/file.h>
 #include <cpprelude/io.h>
+#include <cpprelude/fmt.h>
 #include <cpprelude/string.h>
 #include <stdio.h>
 
@@ -36,7 +37,7 @@ TEST_CASE("memory_stream test", "[memory_stream]")
 		CHECK(stream.cursor() == 4);
 
 		char c;
-		CHECK(vreadb(stream, c) == 1);
+		CHECK(vscanb(stream, c) == 1);
 		CHECK(c == '7');
 
 		CHECK(stream.cursor() == 5);
@@ -44,7 +45,7 @@ TEST_CASE("memory_stream test", "[memory_stream]")
 		CHECK(stream.cursor() == 0);
 
 		int y = 1;
-		CHECK(vreadb(stream, y) == sizeof(int));
+		CHECK(vscanb(stream, y) == sizeof(int));
 		CHECK(y == x);
 
 		CHECK(stream.cursor() == 4);
@@ -96,7 +97,7 @@ TEST_CASE("file_stream test", "[file_stream]")
 			CHECK(stream.move(-1));
 			CHECK(stream.cursor() == 4);
 
-			CHECK(vreadb(stream, c) == 1);
+			CHECK(vscanb(stream, c) == 1);
 			CHECK(c == '6');
 
 			CHECK(stream.cursor() == 5);
@@ -105,7 +106,7 @@ TEST_CASE("file_stream test", "[file_stream]")
 			CHECK(stream.cursor() == 0);
 
 			int y = 1;
-			CHECK(vreadb(stream, y) == sizeof(int));
+			CHECK(vscanb(stream, y) == sizeof(int));
 
 			CHECK(y == x);
 

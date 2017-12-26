@@ -5,6 +5,7 @@
 #include "cpprelude/memory.h"
 #include "cpprelude/platform.h"
 #include "cpprelude/io.h"
+#include "cpprelude/bufio.h"
 
 namespace cpprelude
 {
@@ -52,6 +53,14 @@ namespace cpprelude
 		return trait->write(make_slice<byte>(ptr, size));
 	}
 
+	inline static usize
+	print_str(bufout_trait *trait, const rune &c)
+	{
+		byte *ptr = (byte*)(&c);
+		usize size = _strlen(ptr);
+		return trait->write(make_slice<byte>(ptr, size));
+	}
+
 	struct rune_iterator
 	{
 		const byte *_ptr = nullptr;
@@ -89,14 +98,14 @@ namespace cpprelude
 
 		slice<byte> _data;
 		mutable usize _count = static_cast<usize>(-1);
-		memory_context* _context = platform.global_memory;
+		memory_context* _context = platform->global_memory;
 
 		API_CPPR string();
 		API_CPPR string(memory_context* context);
-		API_CPPR explicit string(usize size, memory_context* context = platform.global_memory);
-		API_CPPR string(const char* data, memory_context* context = platform.global_memory);
-		API_CPPR string(const slice<byte>& data, memory_context* context = platform.global_memory);
-		API_CPPR string(slice<byte>&& data, memory_context* context = platform.global_memory);
+		API_CPPR explicit string(usize size, memory_context* context = platform->global_memory);
+		API_CPPR string(const char* data, memory_context* context = platform->global_memory);
+		API_CPPR string(const slice<byte>& data, memory_context* context = platform->global_memory);
+		API_CPPR string(slice<byte>&& data, memory_context* context = platform->global_memory);
 
 		API_CPPR string(const string&);
 		API_CPPR string(const string&, memory_context* context);
@@ -178,10 +187,28 @@ namespace cpprelude
 	}
 
 	inline static usize
+	print_bin(bufout_trait *trait, const cpprelude::string& str)
+	{
+		//remove the last null from the string when printing it
+		byte *ptr = str._data.ptr;
+		usize size = _strlen(ptr, str._data.size);
+
+		return trait->write(make_slice<byte>(ptr, size));
+	}
+
+
+	inline static usize
 	print_bin(io_trait *trait, const char* str)
 	{
 		return trait->write(make_slice((byte*)str, _strlen(str)));
 	}
+
+	inline static usize
+	print_bin(bufout_trait *trait, const char* str)
+	{
+		return trait->write(make_slice((byte*)str, _strlen(str)));
+	}
+
 
 	inline static usize
 	print_str(io_trait *trait, const cpprelude::string& str)
@@ -194,13 +221,31 @@ namespace cpprelude
 	}
 
 	inline static usize
+	print_str(bufout_trait *trait, const cpprelude::string& str)
+	{
+		//remove the last null from the string when printing it
+		byte *ptr = str._data.ptr;
+		usize size = _strlen(ptr, str._data.size);
+
+		return trait->write(make_slice<byte>(ptr, size));
+	}
+
+
+	inline static usize
 	print_str(io_trait *trait, const char* str)
 	{
 		return trait->write(make_slice((byte*)str, _strlen(str)));
 	}
 
 	inline static usize
-	read_bin(io_trait *trait, cpprelude::string& str)
+	print_str(bufout_trait *trait, const char* str)
+	{
+		return trait->write(make_slice((byte*)str, _strlen(str)));
+	}
+
+
+	inline static usize
+	scan_bin(io_trait *trait, cpprelude::string& str)
 	{
 		auto result = trait->read(str._data.view_bytes(0, str._data.size - 1));
 		str._data[result] = 0;
@@ -208,13 +253,29 @@ namespace cpprelude
 	}
 
 	inline static usize
-	read_bin(io_trait *trait, cpprelude::string&& str)
+	scan_bin(bufin_trait *trait, cpprelude::string& str)
 	{
-		return read_bin(trait, str);
+		auto result = trait->read(str._data.view_bytes(0, str._data.size - 1));
+		str._data[result] = 0;
+		return result ;
+	}
+
+
+	inline static usize
+	scan_bin(io_trait *trait, cpprelude::string&& str)
+	{
+		return scan_bin(trait, str);
 	}
 
 	inline static usize
-	read_str(io_trait *trait, cpprelude::string& str)
+	scan_bin(bufin_trait *trait, cpprelude::string&& str)
+	{
+		return scan_bin(trait, str);
+	}
+
+
+	inline static usize
+	scan_str(io_trait *trait, cpprelude::string& str)
 	{
 		auto result = trait->read(str._data.view_bytes(0, str._data.size - 1));
 		str._data[result] = 0;
@@ -222,8 +283,23 @@ namespace cpprelude
 	}
 
 	inline static usize
-	read_str(io_trait *trait, cpprelude::string&& str)
+	scan_str(bufin_trait *trait, cpprelude::string& str)
 	{
-		return read_bin(trait, str);
+		auto result = trait->read(str._data.view_bytes(0, str._data.size - 1));
+		str._data[result] = 0;
+		return result;
+	}
+
+
+	inline static usize
+	scan_str(io_trait *trait, cpprelude::string&& str)
+	{
+		return scan_str(trait, str);
+	}
+
+	inline static usize
+	scan_str(bufin_trait *trait, cpprelude::string&& str)
+	{
+		return scan_str(trait, str);
 	}
 }

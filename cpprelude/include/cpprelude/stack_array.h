@@ -14,7 +14,7 @@ namespace cpprelude
 		dynamic_array<T> _array;
 		usize _count;
 
-		stack_array(memory_context* context = platform.global_memory)
+		stack_array(memory_context* context = platform->global_memory)
 			: _array(context), _count(0)
 		{}
 
@@ -22,7 +22,7 @@ namespace cpprelude
 
 		stack_array(stack_array&&) = default;
 
-		stack_array(usize count, memory_context* context = platform.global_memory)
+		stack_array(usize count, memory_context* context = platform->global_memory)
 			:_array(count, context), _count(0)
 		{}
 

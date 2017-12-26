@@ -50,9 +50,9 @@ namespace cpprelude
 	arena_t::arena_t(usize size, bool use_virtual_memory)
 	{
 		if(use_virtual_memory)
-			_memory = platform.virtual_alloc(nullptr, size);
+			_memory = platform->virtual_alloc(nullptr, size);
 		else
-			_memory = platform.alloc<byte>(size);
+			_memory = platform->alloc<byte>(size);
 
 		_allocation_head = 0;
 		_context._self = this;
@@ -67,9 +67,9 @@ namespace cpprelude
 		if(_memory.valid())
 		{
 			if(_uses_virtual_memory)
-				platform.virtual_free(_memory);
+				platform->virtual_free(_memory);
 			else
-				platform.free(_memory);
+				platform->free(_memory);
 		}
 		_allocation_head = 0;
 	}

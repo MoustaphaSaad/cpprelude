@@ -16,7 +16,7 @@ namespace cpprelude
 		bucket_list<T, bucket_size> _array;
 		usize _capacity, _write_head, _read_head;
 
-		ring_buffer(memory_context* context = platform.global_memory)
+		ring_buffer(memory_context* context = platform->global_memory)
 			:_capacity(bucket_size),
 			 _write_head(0),
 			 _read_head(0),
