@@ -1,5 +1,8 @@
 #include "cpprelude/string.h"
+#include "cpprelude/fmt.h"
+#include "cpprelude/memory.h"
 #include <cstring>
+#include <cstdarg>
 
 namespace cpprelude
 {
@@ -144,7 +147,7 @@ namespace cpprelude
 		while(*ptr)
 		{
 			if ((*ptr & 0xC0) == 0x80)
-				result[ix++] = *ptr;
+				result[ix] = *ptr;
 			else
 				break;
 			++ptr;
@@ -164,8 +167,45 @@ namespace cpprelude
 	{
 		usize result = 0;
 		if(data)
-	    	while(*data) result += (*data++ & 0xC0) != 0x80;
-	    return result;
+			while(*data) result += (*data++ & 0xC0) != 0x80;
+		return result;
+	}
+
+	inline usize
+	_count_runes_limit(const byte* data, usize limit)
+	{
+		usize result = 0;
+		if(data && limit)
+			while(*data && --limit) result += (*data++ & 0xC0) != 0x80;
+		return result;
+	}
+
+	inline usize
+	_count_runes_to(const byte* data, usize to)
+	{
+		auto old_data = data;
+		usize count = 0;
+		usize result = 0;
+		if(data)
+		{
+			while(true)
+			{
+				count += (*data++ & 0xC0) != 0x80;
+
+				if(count == to + 1)
+				{
+					result = (data - old_data) - 1;
+					break;
+				}
+
+				if (*data == 0)
+				{
+					result = (data - old_data);
+					break;
+				}
+			}
+		}
+		return result;
 	}
 
 	inline isize
@@ -182,6 +222,9 @@ namespace cpprelude
 			++a_it;
 			++b_it;
 		}
+
+		if (a_it == a.end() && b_it == b.end())
+			return 0;
 
 		auto last_a = *a_it;
 		auto last_b = *b_it;
@@ -345,7 +388,7 @@ namespace cpprelude
 	string::count() const
 	{
 		if(_count == static_cast<usize>(-1))
-			_count = _count_runes(_data.ptr);
+			_count = _count_runes_limit(_data.ptr, _data.size);
 		return _count;
 	}
 
@@ -441,6 +484,85 @@ namespace cpprelude
 		if (_data.ptr == nullptr)
 			return const_iterator(nullptr);
 		return const_iterator(_data.ptr + _data.size - 1);
+	}
+
+	void
+	string::concat(const string& other)
+	{
+		if (other._data.size == 0)
+			return;
+		usize old_size = _data.size;
+		//-1 for the two null termination added
+		if (_data.size > 0)
+			--old_size;
+		_context->template realloc<byte>(_data, old_size + other._data.size);
+		copy_slice(_data.view_bytes(old_size, _data.size - old_size), other._data, other._data.size);
+		_data[_data.size - 1] = 0;
+		_count = static_cast<usize>(-1);
+	}
+
+	string
+	string::substr(usize start, usize size, memory_context *context)
+	{
+		if(context == nullptr)
+			context = _context;
+
+		usize start_byte_index = _count_runes_to(_data, start);
+		//it's the index starting from the offsetted ptr so essentially it's a size
+		usize end_byte_size = _count_runes_to(_data.ptr + start_byte_index, size);
+		auto subslice = _data.view(start_byte_index, end_byte_size);
+		string result(subslice.size + 1, context);
+		copy_slice(result._data, subslice, subslice.size);
+		result._data[subslice.size] = 0;
+		return result;
+	}
+
+	string
+	string::substr(rune_iterator begin, rune_iterator end, memory_context *context)
+	{
+		if(context == nullptr)
+			context = _context;
+
+		usize start_byte_index = begin._ptr - _data.ptr;
+		usize end_byte_size = end._ptr - begin._ptr;
+		auto subslice = _data.view(start_byte_index, end_byte_size);
+		string result(subslice.size + 1, context);
+		copy_slice(result._data, subslice, subslice.size);
+		result._data[subslice.size] = 0;
+		return result;
+	}
+
+	string
+	string::view(usize start, usize size)
+	{
+		usize start_byte_index = _count_runes_to(_data, start);
+		//it's the index starting from the offsetted ptr so essentially it's a size
+		usize end_byte_size = _count_runes_to(_data.ptr + start_byte_index, size);
+		//+1 for the imaginary 0
+		auto subslice = _data.view(start_byte_index, end_byte_size + 1);
+		return string(std::move(subslice), nullptr);
+	}
+
+	string
+	string::view(rune_iterator begin, rune_iterator end)
+	{
+		usize start_byte_index = begin._ptr - _data.ptr;
+		usize end_byte_size = end._ptr - begin._ptr;
+		auto subslice = _data.view(start_byte_index, end_byte_size + 1);
+		return string(std::move(subslice), nullptr);
+	}
+
+	slice<byte>
+	string::decay()
+	{
+		_count = static_cast<usize>(-1);
+		return std::move(_data);
+	}
+
+	slice<byte>
+	string::decay_continuous()
+	{
+		return decay();
 	}
 
 	string

@@ -39,7 +39,7 @@
   <!-- Types -->
   <Type Name="cpprelude::string">
     <DisplayString Condition="_data.size == 0">empty</DisplayString>
-    <DisplayString Condition="_data.size != 0">{_data.ptr,s8}</DisplayString>
+    <DisplayString Condition="_data.size != 0" Encoding="Utf8">{_data.ptr,[_data.size - 1]s8}</DisplayString>
   </Type>
 
 

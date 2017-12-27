@@ -46,6 +46,25 @@ do_stuff()
 void
 do_other_stuff()
 {
+	string str = "moka ";
+	println("printing str<", str, ">");
+	str.concat("My name is mostafa"_cs);
+	println("printing str<", str, ">");
+	string substr = str.substr(1, 4);
+	println("printing substr<", substr, ">");
+
+	string viewstr = str.view(2, 4);
+	println("printing viewstr<", viewstr, ">");
+
+	arena_t mem(MEGABYTES(25));
+
+	string concated_string = concat("My ", "Name ", "is مصطفى", " Mostafa ", 1234);
+	println("concated_string<", concated_string, ">");
+}
+
+void
+echo()
+{
 	string str;
 	while (true)
 	{
@@ -60,7 +79,8 @@ int
 main(int argc, char** argv)
 {
 	// do_stuff();
-	do_other_stuff();
+	// do_other_stuff();
+	echo();
 	return 0;
 	do_benchmark();
 	return 0;

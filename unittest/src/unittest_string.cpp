@@ -100,4 +100,38 @@
  			}
  		}
  	}
+
+ 	SECTION("Case 05")
+ 	{
+ 		string original = "Mostafa مصطفى 調ヨ沖掲不";
+ 		string english = original.substr(0, 7);
+ 		string arabic = original.substr(8, 5);
+ 		string japanese = original.substr(14, 5);
+
+ 		CHECK(english.count() == 7);
+ 		CHECK(arabic.count() == 5);
+ 		CHECK(japanese.count() == 5);
+
+ 		string en_view = original.view(0, 7);
+ 		string ar_view = original.view(8, 5);
+ 		string jp_view = original.view(14, 5);
+
+ 		CHECK(en_view.count() == 7);
+ 		CHECK(ar_view.count() == 5);
+ 		CHECK(jp_view.count() == 5);
+
+ 		CHECK(english == en_view);
+ 		CHECK(arabic == ar_view);
+ 		CHECK(japanese == jp_view);
+ 	}
+
+ 	SECTION("Case 06")
+ 	{
+ 		string str;
+ 		str.concat("my "_cs);
+ 		str.concat("name is "_cs);
+ 		str.concat("مصطفى"_cs);
+
+ 		CHECK(str == "my name is مصطفى");
+ 	}
  }

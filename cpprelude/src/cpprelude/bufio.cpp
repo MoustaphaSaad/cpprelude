@@ -1,4 +1,5 @@
 #include "cpprelude/bufio.h"
+#include "cpprelude/memory.h"
 #include <algorithm>
 
 namespace cpprelude
@@ -22,6 +23,9 @@ namespace cpprelude
 				size_diff));
 
 		self->_buffer._size += read_size;
+
+		if (available_size + read_size == 0)
+			return slice<byte>();
 
 		return self->_buffer._data.view_bytes(self->_buffer.cursor(), available_size + read_size);
 	}

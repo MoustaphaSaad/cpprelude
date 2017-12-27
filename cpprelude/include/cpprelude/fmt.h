@@ -5,6 +5,8 @@
 #include "cpprelude/memory.h"
 #include "cpprelude/io.h"
 #include "cpprelude/bufio.h"
+#include "cpprelude/stream.h"
+#include "cpprelude/string.h"
 
 namespace cpprelude
 {
@@ -148,7 +150,7 @@ namespace cpprelude
 
 	template<typename TFirst, typename ... TArgs>
 	inline static usize
-	vprints(bufout_trait *trait, TFirst&& first_args, TArgs&& ... args)
+	vprints(bufout_trait *trait, TFirst&& first_arg, TArgs&& ... args)
 	{
 		usize result = 0;
 		result += print_str(trait, std::forward<TFirst>(first_arg));
@@ -243,7 +245,7 @@ namespace cpprelude
 	vscans(io_trait *trait, TFirst&& first_arg, TArgs&& ... args)
 	{
 		usize result = 0;
-		result += scan_str(trait, std::forward<TFirst>(first_args));
+		result += scan_str(trait, std::forward<TFirst>(first_arg));
 		result += vscans(trait, std::forward<TArgs>(args)...);
 		return result;
 	}
@@ -253,7 +255,7 @@ namespace cpprelude
 	vscans(bufin_trait *trait, TFirst&& first_arg, TArgs&& ... args)
 	{
 		usize result = 0;
-		result += scan_str(trait, std::forward<TFirst>(first_args));
+		result += scan_str(trait, std::forward<TFirst>(first_arg));
 		result += vscans(trait, std::forward<TArgs>(args)...);
 		return result;
 	}
@@ -327,27 +329,39 @@ namespace cpprelude
 		return vscans(buf_stdin, std::forward<TArgs>(args)...);
 	}
 
-	API_CPPR void
-	_platform_specific_to_string(const slice<byte>& data, string& str);
+	inline static void
+	_platform_specific_to_string(const slice<byte>& data, string& str)
+	{
+		usize str_size = data.size;
+		//check for \r
+		if (data[str_size - 1] == '\r')
+			--str_size;
+
+		str._context->template realloc<byte>(str._data, str_size + 1);
+		str._count = static_cast<usize>(-1);
+
+		copy_slice(str._data, data, data.size);
+		str._data[str_size] = 0;
+	}
 
 	inline static usize
-	scanln(string& str)
+	vscanln(bufin_trait *trait, string& str)
 	{
 		usize peek_request_size = KILOBYTES(1);
 		usize parsed_peeked_size = 0;
 
-		usize line_limit = 0;
-
-		while(true)
+		while (true)
 		{
-			slice<byte> peek_response = buf_stdin->peek(peek_request_size);
+			slice<byte> peek_response = trait->peek(peek_request_size);
+			if (!peek_response.valid())
+				break;
 
 			bool found_ln = false;
 			usize it_ix = parsed_peeked_size;
 			byte *it = peek_response.ptr + it_ix;
-			while(it_ix < peek_response.size)
+			while (it_ix < peek_response.size)
 			{
-				if(*it == '\n')
+				if (*it == '\n')
 				{
 					found_ln = true;
 					break;
@@ -356,11 +370,11 @@ namespace cpprelude
 				++it_ix;
 			}
 
-			if(found_ln == true)
+			if (found_ln == true)
 			{
 				_platform_specific_to_string(peek_response.view_bytes(0, it_ix), str);
 				//+1 to skip the new line itself
-				buf_stdin->skip(it_ix + 1);
+				trait->skip(it_ix + 1);
 				return it_ix + 1;
 			}
 
@@ -369,5 +383,72 @@ namespace cpprelude
 		}
 
 		return 0;
+	}
+
+	inline static usize
+	scanln(string& str)
+	{
+		return vscanln(buf_stdin, str);
+		//usize peek_request_size = KILOBYTES(1);
+		//usize parsed_peeked_size = 0;
+
+		//usize line_limit = 0;
+
+		//while(true)
+		//{
+		//	slice<byte> peek_response = buf_stdin->peek(peek_request_size);
+
+		//	bool found_ln = false;
+		//	usize it_ix = parsed_peeked_size;
+		//	byte *it = peek_response.ptr + it_ix;
+		//	while(it_ix < peek_response.size)
+		//	{
+		//		if(*it == '\n')
+		//		{
+		//			found_ln = true;
+		//			break;
+		//		}
+		//		++it;
+		//		++it_ix;
+		//	}
+
+		//	if(found_ln == true)
+		//	{
+		//		_platform_specific_to_string(peek_response.view_bytes(0, it_ix), str);
+		//		//+1 to skip the new line itself
+		//		buf_stdin->skip(it_ix + 1);
+		//		return it_ix + 1;
+		//	}
+
+		//	parsed_peeked_size += peek_response.size;
+		//	peek_request_size = parsed_peeked_size + KILOBYTES(1);
+		//}
+
+		//return 0;
+	}
+
+
+
+	//string concat
+	template<typename ... TArgs>
+	inline static string
+	vconcat(memory_context *context, TArgs&& ... args)
+	{
+		memory_stream stream(context);
+		usize printed_size = vprints(stream, std::forward<TArgs>(args)...);
+		context->template realloc<byte>(stream._data, printed_size + 1);
+		stream._data[printed_size] = 0;
+
+		string result(std::move(stream._data), context);
+		stream._size = 0;
+		stream._cursor = 0;
+		return result;
+	}
+
+	template<typename ... TArgs>
+	inline static string
+	concat(TArgs&& ... args)
+	{
+		return vconcat(platform->global_memory, std::forward<TArgs>(args)...);
 	}
 }

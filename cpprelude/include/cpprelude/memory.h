@@ -163,4 +163,18 @@ namespace cpprelude
 	{
 		move_slice(dst, src, count);
 	}
+
+	template<typename T>
+	void
+	move_slice(slice<T>& dst, slice<T>&& src, usize count = 0)
+	{
+		move_slice(dst, src, count);
+	}
+
+	template<typename T>
+	void
+	move_slice(slice<T>&& dst, slice<T>&& src, usize count = 0)
+	{
+		move_slice(dst, src, count);
+	}
 }

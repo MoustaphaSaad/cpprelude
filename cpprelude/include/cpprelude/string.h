@@ -12,6 +12,9 @@ namespace cpprelude
 	inline static usize
 	_strlen(const byte *it, usize limit = -1)
 	{
+		if (limit == 0 || it == nullptr)
+			return 0;
+
 		usize result = 0;
 		while(*it++ != 0 && result < limit)
 			++result;
@@ -171,6 +174,27 @@ namespace cpprelude
 
 		API_CPPR const_iterator
 		cend() const;
+
+		API_CPPR void
+		concat(const string& other);
+
+		API_CPPR string
+		substr(usize start, usize size, memory_context *context = nullptr);
+
+		API_CPPR string
+		substr(rune_iterator begin, rune_iterator end, memory_context *context = nullptr);
+
+		API_CPPR string
+		view(usize start, usize size);
+
+		API_CPPR string
+		view(rune_iterator begin, rune_iterator end);
+
+		API_CPPR slice<byte>
+		decay();
+
+		API_CPPR slice<byte>
+		decay_continuous();
 	};
 
 	API_CPPR cpprelude::string
