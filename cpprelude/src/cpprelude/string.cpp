@@ -57,7 +57,8 @@ namespace cpprelude
 	rune_iterator&
 	rune_iterator::operator++()
 	{
-		if(*_ptr == 0)
+		i8 data = *_ptr;
+		if(data == 0)
 			return *this;
 
 		++_ptr;

@@ -95,26 +95,45 @@ namespace cpprelude
 		}
 
 		slice<T>
-		view(usize start = 0, usize count = 0)
+		view(usize start = 0)
 		{
-			if(count == 0)
-				count = (size - (start * sizeof(T))) / sizeof(T);
+			usize count = (size - (start * sizeof(T))) / sizeof(T);
 
 			return slice<T>(ptr+start, count * sizeof(T));
 		}
 
 		slice<T>
-		view_bytes(usize offset = 0, usize new_size = 0)
+		view(usize start, usize count)
 		{
-			if(new_size == 0)
-				new_size = size - offset;
+			return slice<T>(ptr+start, count * sizeof(T));
+		}
 
+		slice<T>
+		view_bytes(usize offset = 0)
+		{
+			usize new_size = size - offset;
+
+			return slice<T>(reinterpret_cast<T*>(reinterpret_cast<ubyte*>(ptr)+offset), new_size);
+		}
+
+		slice<T>
+		view_bytes(usize offset, usize new_size)
+		{
 			return slice<T>(reinterpret_cast<T*>(reinterpret_cast<ubyte*>(ptr)+offset), new_size);
 		}
 
 		template<typename R>
 		slice<R>
-		view_bytes(usize offset = 0, usize new_size = 0)
+		view_bytes(usize offset = 0)
+		{
+			usize new_size = size - offset;
+
+			return slice<R>(reinterpret_cast<R*>(reinterpret_cast<ubyte*>(ptr)+offset), new_size);
+		}
+
+		template<typename R>
+		slice<R>
+		view_bytes(usize offset, usize new_size)
 		{
 			if(new_size == 0)
 				new_size = size - offset;

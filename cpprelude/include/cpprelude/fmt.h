@@ -7,6 +7,8 @@
 #include "cpprelude/bufio.h"
 #include "cpprelude/stream.h"
 #include "cpprelude/string.h"
+#include <cinttypes>
+#include <cstdio>
 
 namespace cpprelude
 {
@@ -108,11 +110,24 @@ namespace cpprelude
 	DEFINE_PRINT_STR(io_trait, u32, "%u", 20)
 	DEFINE_PRINT_STR(bufout_trait, u32, "%u", 20)
 
+	//long in linux land is 8 byte howeven in windows universe it's 4 byte so we do this
+	#if defined(OS_WINDOWS)
+
+	DEFINE_PRINT_STR(io_trait, i64, "%lld", 40)
+	DEFINE_PRINT_STR(bufout_trait, i64, "%lld", 40)
+
+	DEFINE_PRINT_STR(io_trait, u64, "%llu", 40)
+	DEFINE_PRINT_STR(bufout_trait, u64, "%llu", 40)
+
+	#elif defined(OS_LINUX)
+
 	DEFINE_PRINT_STR(io_trait, i64, "%ld", 40)
 	DEFINE_PRINT_STR(bufout_trait, i64, "%ld", 40)
 
 	DEFINE_PRINT_STR(io_trait, u64, "%lu", 40)
 	DEFINE_PRINT_STR(bufout_trait, u64, "%lu", 40)
+
+	#endif
 
 	DEFINE_PRINT_STR(io_trait, r32, "%f", 128)
 	DEFINE_PRINT_STR(bufout_trait, r32, "%f", 128)
@@ -120,10 +135,29 @@ namespace cpprelude
 	DEFINE_PRINT_STR(io_trait, r64, "%.12f", 256)
 	DEFINE_PRINT_STR(bufout_trait, r64, "%.12f", 256)
 
-	DEFINE_PRINT_STR(io_trait, void*, "%p", 40)
-	DEFINE_PRINT_STR(bufout_trait, void*, "%p", 40)
-
 	#undef DEFINE_PRINT_STR
+
+	//printing pointers
+	inline static usize
+	print_str(io_trait *trait, void* ptr)
+	{
+		usize value = reinterpret_cast<usize>(ptr);
+		byte buffer[80];
+		int written_size = std::snprintf(buffer, 80, "0x%" PRIXPTR, value);
+		if(written_size < 0) return 0;
+		return trait->write(make_slice<byte>(buffer, written_size));
+	}
+
+	inline static usize
+	print_str(bufout_trait *trait, void* ptr)
+	{
+		usize value = reinterpret_cast<usize>(ptr);
+		byte buffer[80];
+		int written_size = std::snprintf(buffer, 80, "0x%" PRIXPTR, value);
+		if(written_size < 0) return 0;
+		return trait->write(make_slice<byte>(buffer, written_size));
+	}
+
 
 	//section(vprints)
 	inline static usize
@@ -244,8 +278,11 @@ namespace cpprelude
 	inline static usize
 	vscans(io_trait *trait, TFirst&& first_arg, TArgs&& ... args)
 	{
-		usize result = 0;
-		result += scan_str(trait, std::forward<TFirst>(first_arg));
+		usize result = 0, tmp = 0;
+		tmp = scan_str(trait, std::forward<TFirst>(first_arg));
+		if (tmp == 0)
+			return 0;
+		result += tmp;
 		result += vscans(trait, std::forward<TArgs>(args)...);
 		return result;
 	}
@@ -254,8 +291,11 @@ namespace cpprelude
 	inline static usize
 	vscans(bufin_trait *trait, TFirst&& first_arg, TArgs&& ... args)
 	{
-		usize result = 0;
-		result += scan_str(trait, std::forward<TFirst>(first_arg));
+		usize result = 0, tmp = 0;
+		tmp = scan_str(trait, std::forward<TFirst>(first_arg));
+		if (tmp == 0)
+			return 0;
+		result += tmp;
 		result += vscans(trait, std::forward<TArgs>(args)...);
 		return result;
 	}
@@ -389,42 +429,6 @@ namespace cpprelude
 	scanln(string& str)
 	{
 		return vscanln(buf_stdin, str);
-		//usize peek_request_size = KILOBYTES(1);
-		//usize parsed_peeked_size = 0;
-
-		//usize line_limit = 0;
-
-		//while(true)
-		//{
-		//	slice<byte> peek_response = buf_stdin->peek(peek_request_size);
-
-		//	bool found_ln = false;
-		//	usize it_ix = parsed_peeked_size;
-		//	byte *it = peek_response.ptr + it_ix;
-		//	while(it_ix < peek_response.size)
-		//	{
-		//		if(*it == '\n')
-		//		{
-		//			found_ln = true;
-		//			break;
-		//		}
-		//		++it;
-		//		++it_ix;
-		//	}
-
-		//	if(found_ln == true)
-		//	{
-		//		_platform_specific_to_string(peek_response.view_bytes(0, it_ix), str);
-		//		//+1 to skip the new line itself
-		//		buf_stdin->skip(it_ix + 1);
-		//		return it_ix + 1;
-		//	}
-
-		//	parsed_peeked_size += peek_response.size;
-		//	peek_request_size = parsed_peeked_size + KILOBYTES(1);
-		//}
-
-		//return 0;
 	}
 
 

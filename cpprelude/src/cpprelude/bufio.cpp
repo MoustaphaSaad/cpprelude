@@ -12,7 +12,7 @@ namespace cpprelude
 		usize available_size = self->_buffer.size() - self->_buffer.cursor();
 
 		if(size <= available_size)
-			return self->_buffer._data.view_bytes(self->_buffer.cursor(), size);
+			return self->_buffer._data.view_bytes(self->_buffer.cursor(), available_size);
 
 		usize size_diff = size - available_size;
 		//try to read some data to match the demand
