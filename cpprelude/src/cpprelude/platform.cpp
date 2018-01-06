@@ -81,108 +81,108 @@ namespace cpprelude
 	void
 	platform_t::print_memory_report() const
 	{
-#ifdef DEBUG
+		#ifdef DEBUG
 		println_err("allocation count = ", allocation_count, "\n",
 			"allocation size = ", allocation_size);
-#endif
+		#endif
 	}
 
 	void
 	platform_t::dump_callstack() const
 	{
 		#ifdef DEBUG
-
-		constexpr usize MAX_NAME_LEN = 1024;
-		constexpr usize STACK_MAX = 2048;
-		void* callstack[STACK_MAX];
-
-		#if defined(OS_WINDOWS)
 		{
-			auto process_handle = GetCurrentProcess();
+			constexpr usize MAX_NAME_LEN = 1024;
+			constexpr usize STACK_MAX = 2048;
+			void* callstack[STACK_MAX];
 
-			//allocate a buffer for the symbol info
-			//windows lays the symbol info in memory in this form
-			//[struct][name buffer]
-			//and the name buffer size is the same as the MaxNameLen set below
-			byte buffer[sizeof(SYMBOL_INFO) + MAX_NAME_LEN];
-
-			SYMBOL_INFO* symbol = reinterpret_cast<SYMBOL_INFO*>(buffer);
-			memset(symbol, 0, sizeof(SYMBOL_INFO));
-
-			symbol->MaxNameLen = MAX_NAME_LEN;
-			symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
-			
-			usize frames_count = CaptureStackBackTrace(0, STACK_MAX, callstack, NULL);
-			for (usize i = 0; i < frames_count; ++i)
+			#if defined(OS_WINDOWS)
 			{
-				if (SymFromAddr(process_handle, (DWORD64)(callstack[i]), NULL, symbol))
-					println_err("[", frames_count - i - 1, "]: ", symbol->Name);
-				else
-					println_err("[", frames_count - i - 1, "]: ", "unknown symbol");
-			}
-		}
-		#elif defined(OS_LINUX)
-		{
-			//+1 for null terminated string
-			char name_buffer[MAX_NAME_LEN+1];
-			char demangled_buffer[MAX_NAME_LEN];
-			usize demangled_buffer_length = MAX_NAME_LEN;
+				auto process_handle = GetCurrentProcess();
 
-			//capture the call stack
-			usize frames_count = backtrace(callstack, STACK_MAX);
-			//resolve the symbols
-			char** symbols = backtrace_symbols(callstack, frames_count);
+				//allocate a buffer for the symbol info
+				//windows lays the symbol info in memory in this form
+				//[struct][name buffer]
+				//and the name buffer size is the same as the MaxNameLen set below
+				byte buffer[sizeof(SYMBOL_INFO) + MAX_NAME_LEN];
 
-			if(symbols)
-			{
-				for(usize i = 0; i < frames_count; ++i)
+				SYMBOL_INFO* symbol = reinterpret_cast<SYMBOL_INFO*>(buffer);
+				memset(symbol, 0, sizeof(SYMBOL_INFO));
+
+				symbol->MaxNameLen = MAX_NAME_LEN;
+				symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+				
+				usize frames_count = CaptureStackBackTrace(0, STACK_MAX, callstack, NULL);
+				for (usize i = 0; i < frames_count; ++i)
 				{
-					//isolate the function name
-					char *name_begin = nullptr, *name_end = nullptr, *name_it = symbols[i];
-					while(*name_it != 0)
-					{
-						if(*name_it == '(')
-							name_begin = name_it+1;
-						else if(*name_it == ')' || *name_it == '+')
-						{
-							name_end = name_it;
-							break;
-						}
-						++name_it;
-					}
-
-					
-					usize mangled_name_size = name_end - name_begin;
-					//function maybe inlined
-					if(mangled_name_size == 0)
-					{
-						println_err("[", frames_count - i - 1, "]: unknown/inlined symbol");
-						continue;
-					}
-
-					//copy the function name into the name buffer
-					usize copy_size = mangled_name_size > MAX_NAME_LEN ? MAX_NAME_LEN : mangled_name_size;
-					memcpy(name_buffer, name_begin, copy_size);
-					name_buffer[copy_size] = 0;
-
-					int status = 0;
-					abi::__cxa_demangle(name_buffer, demangled_buffer, &demangled_buffer_length, &status);
-					if(status == 0)
-					{
-						auto function_name = string(make_slice(demangled_buffer, demangled_buffer_length), nullptr);
-						println_err("[", frames_count - i - 1, "]: ", function_name);
-					}
+					if (SymFromAddr(process_handle, (DWORD64)(callstack[i]), NULL, symbol))
+						println_err("[", frames_count - i - 1, "]: ", symbol->Name);
 					else
-					{
-						auto function_name = string(make_slice(name_buffer, copy_size), nullptr);
-						println_err("[", frames_count - i - 1, "]: ", function_name);
-					}
+						println_err("[", frames_count - i - 1, "]: ", "unknown symbol");
 				}
-				::free(symbols);
 			}
-		}
-		#endif
+			#elif defined(OS_LINUX)
+			{
+				//+1 for null terminated string
+				char name_buffer[MAX_NAME_LEN+1];
+				char demangled_buffer[MAX_NAME_LEN];
+				usize demangled_buffer_length = MAX_NAME_LEN;
 
+				//capture the call stack
+				usize frames_count = backtrace(callstack, STACK_MAX);
+				//resolve the symbols
+				char** symbols = backtrace_symbols(callstack, frames_count);
+
+				if(symbols)
+				{
+					for(usize i = 0; i < frames_count; ++i)
+					{
+						//isolate the function name
+						char *name_begin = nullptr, *name_end = nullptr, *name_it = symbols[i];
+						while(*name_it != 0)
+						{
+							if(*name_it == '(')
+								name_begin = name_it+1;
+							else if(*name_it == ')' || *name_it == '+')
+							{
+								name_end = name_it;
+								break;
+							}
+							++name_it;
+						}
+
+						
+						usize mangled_name_size = name_end - name_begin;
+						//function maybe inlined
+						if(mangled_name_size == 0)
+						{
+							println_err("[", frames_count - i - 1, "]: unknown/inlined symbol");
+							continue;
+						}
+
+						//copy the function name into the name buffer
+						usize copy_size = mangled_name_size > MAX_NAME_LEN ? MAX_NAME_LEN : mangled_name_size;
+						memcpy(name_buffer, name_begin, copy_size);
+						name_buffer[copy_size] = 0;
+
+						int status = 0;
+						abi::__cxa_demangle(name_buffer, demangled_buffer, &demangled_buffer_length, &status);
+						if(status == 0)
+						{
+							auto function_name = string(make_slice(demangled_buffer, demangled_buffer_length), nullptr);
+							println_err("[", frames_count - i - 1, "]: ", function_name);
+						}
+						else
+						{
+							auto function_name = string(make_slice(name_buffer, copy_size), nullptr);
+							println_err("[", frames_count - i - 1, "]: ", function_name);
+						}
+					}
+					::free(symbols);
+				}
+			}
+			#endif
+		}
 		#endif
 	}
 
@@ -536,10 +536,12 @@ namespace cpprelude
 			return slice<T>();
 		T* ptr = reinterpret_cast<T*>(std::malloc(count * sizeof(T)));
 
-#ifdef DEBUG
-		++platform->allocation_count;
-		platform->allocation_size += count * sizeof(T);
-#endif
+		#ifdef DEBUG
+		{
+			++platform->allocation_count;
+			platform->allocation_size += count * sizeof(T);
+		}	
+		#endif
 
 		return slice<T>(ptr, ptr ? count * sizeof(T) : 0);
 	}
@@ -549,10 +551,12 @@ namespace cpprelude
 	{
 		if (slice_.ptr != nullptr)
 		{
-#ifdef DEBUG
-			--platform->allocation_count;
-			platform->allocation_size -= slice_.size;
-#endif
+			#ifdef DEBUG
+			{
+				--platform->allocation_count;
+				platform->allocation_size -= slice_.size;
+			}
+			#endif
 			std::free(slice_.ptr);
 		}
 
@@ -570,10 +574,12 @@ namespace cpprelude
 			return;
 		}
 
-#ifdef DEBUG
-		platform->allocation_size += (count * sizeof(T)) - slice_.size;
-		if (!slice_.valid()) ++platform->allocation_count;
-#endif
+		#ifdef DEBUG
+		{
+			platform->allocation_size += (count * sizeof(T)) - slice_.size;
+			if (!slice_.valid()) ++platform->allocation_count;
+		}
+		#endif
 
 		slice_.ptr = reinterpret_cast<T*>(std::realloc(slice_.ptr, count * sizeof(T)));
 		slice_.size = count * sizeof(T);
@@ -624,6 +630,7 @@ namespace cpprelude
 
 		//windows setup stuff
 		#if defined(OS_WINDOWS)
+		{
 			//set the console mode to support utf8
 			SetConsoleOutputCP(CP_UTF8);
 
@@ -635,6 +642,7 @@ namespace cpprelude
 					_platform.debug_configured = true;
 			}
 			#endif
+		}
 		#endif
 
 		_is_initialized = true;

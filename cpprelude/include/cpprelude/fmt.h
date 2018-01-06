@@ -45,6 +45,7 @@ namespace cpprelude
 
 
 	//section(vprintb)
+	//vprintb = variadic print binary
 	inline static usize
 	vprintb(io_trait *trait)
 	{
@@ -160,6 +161,7 @@ namespace cpprelude
 
 
 	//section(vprints)
+	//vprints = variadic print string
 	inline static usize
 	vprints(io_trait *trait)
 	{
@@ -226,6 +228,7 @@ namespace cpprelude
 
 
 	//section(vscanb)
+	//vscanb = variadic scan binary
 	inline static usize
 	vscanb(io_trait *trait)
 	{
@@ -262,6 +265,7 @@ namespace cpprelude
 	//section(scan_str)
 
 	//section(vscans)
+	//vscans = variadic scan string
 	inline static usize
 	vscans(io_trait *trait)
 	{
@@ -384,6 +388,7 @@ namespace cpprelude
 		str._data[str_size] = 0;
 	}
 
+	//variadic scan line
 	inline static usize
 	vscanln(bufin_trait *trait, string& str)
 	{
