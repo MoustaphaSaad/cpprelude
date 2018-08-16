@@ -33,6 +33,14 @@ static_assert(sizeof(intptr_t) == sizeof(void*),
 
 namespace cppr
 {
+	struct Memory_Block
+	{
+		usize size = 0;
+		Memory_Block *next = nullptr, *prev = nullptr;
+	};
+
+	static Memory_Block* head;
+
 	OS::~OS()
 	{
 		#if defined(OS_WINDOWS) && defined(DEBUG)
@@ -561,20 +569,36 @@ namespace cppr
 		if(size == 0)
 			return Owner<byte>();
 
-		byte* ptr = (byte*)std::malloc(size);
-
-		if(ptr == nullptr)
-			return Owner<byte>();
-
 		#ifdef DEBUG
 		{
-			OS* self = (OS*)_self;
+			size += sizeof(Memory_Block);
+			Memory_Block* ptr = (Memory_Block*)std::malloc(size);
+
+			if(ptr == nullptr)
+				return Owner<byte>();
+
+			ptr->size = size;
+			ptr->next = head;
+			if(head) head->prev = ptr;
+			head = ptr;
+
+			return Owner<byte>((byte*)(ptr + 1), size);
+
+			/*OS* self = (OS*)_self;
 			self->allocation_count += 1;
-			self->allocation_size += size;
+			self->allocation_size += size;*/
 			//os->dump_callstack();
 		}
+		#elif
+		{
+			byte* ptr = (byte*)std::malloc(size);
+
+			if(ptr == nullptr)
+				return Owner<byte>();
+
+			return Owner<byte>(ptr, size);
+		}
 		#endif
-		return Owner<byte>(ptr, size);
 	}
 
 	void
@@ -585,14 +609,23 @@ namespace cppr
 
 		#ifdef DEBUG
 		{
-			OS* self = (OS*)_self;
-			self->allocation_count -= 1;
-			self->allocation_size -= value.size;
+			Memory_Block* ptr = (Memory_Block*)(value.ptr - sizeof(Memory_Block));
+			
+			if(ptr->prev)
+				ptr->prev->next = ptr->next;
+			else if(ptr == head)
+				head = ptr->next;
+			std::free(ptr);
+			//OS* self = (OS*)_self;
+			//self->allocation_count -= 1;
+			//self->allocation_size -= value.size;
 			//os->dump_callstack();
 		}
+		#elif
+		{
+			std::free(value.ptr);
+		}
 		#endif
-
-		std::free(value.ptr);
 	}
 
 	Owner<byte>
