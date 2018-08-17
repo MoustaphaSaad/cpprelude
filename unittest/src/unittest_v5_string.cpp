@@ -45,7 +45,7 @@ TEST_CASE("string", "[string]")
 
 	SECTION("Case 05")
 	{
-		auto data = os->template alloc<byte>(3);
+		auto data = alloc<byte>(3);
 		data[0] = 'm';
 		data[1] = 'o';
 		data[2] = 's';
@@ -54,12 +54,12 @@ TEST_CASE("string", "[string]")
 		CHECK(str.count() == 3);
 		CHECK(str.empty() == false);
 		CHECK(str.capacity() >= 3);
-		os->free(data);
+		free(data);
 	}
 
 	SECTION("Case 06")
 	{
-		auto data = os->template alloc<byte>(3);
+		auto data = alloc<byte>(3);
 		data[0] = 'm';
 		data[1] = 'o';
 		data[2] = 's';

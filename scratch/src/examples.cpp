@@ -114,14 +114,14 @@ void
 e4_heap()
 {
 	//alloc a single i32
-	Owner<i32> my_number = os->template alloc<i32>();
+	Owner<i32> my_number = alloc<i32>();
 	//alloc 10 i32
-	Owner<i32> my_array = os->template alloc<i32>(10);
+	Owner<i32> my_array = alloc<i32>(10);
 	//note that alloc doesn't invoke any constructors
 
 	//construct a single `1` Child and invoke the constructor with the argument `35`
 	//and store it in Base (this invokes constructors)
-	Owner<Base> ptr = os->template construct<Child>(1, 35);
+	Owner<Base> ptr = construct<Child>(1, 35);
 
 	//you can access the underlying pointer
 	i32* arr_begin = my_array.ptr;
@@ -136,12 +136,12 @@ e4_heap()
 	BLOCK_WARNING(arr_count);
 
 	//don't forget to free the allocated memory
-	os->free(my_number);
-	os->free(my_array);
+	free(my_number);
+	free(my_array);
 	//note that free doesn't invoke any destructors
 
 	//destruct the ptr (this invokes destructors)
-	os->destruct(ptr);
+	destruct(ptr);
 }
 
 /**
@@ -332,7 +332,7 @@ e9_load_file()
 	//we can ignore the error value
 	File other_file = File::open("my_other_file", IO_MODE::READ, OPEN_MODE::OPEN_ONLY).value;
 
-	Owner<byte> file_content = os->template alloc<byte>(other_file.size());
+	Owner<byte> file_content = alloc<byte>(other_file.size());
 	other_file.read(file_content.all());
 	String content(std::move(file_content));
 	println(content);

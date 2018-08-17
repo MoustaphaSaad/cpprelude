@@ -43,6 +43,9 @@ namespace cppr
 		 */
 		Allocator_Trait* global_memory;
 
+		//used in case you want to check for leaks [it's slow]
+		Allocator_Trait* leak_detector;
+
 		/**
 		 * The virtual memory context which uses the underlying OS specfic virtual alloc and free
 		 * It's recommended to use this with Big allocations only i.e. 1GB of memory
@@ -68,121 +71,112 @@ namespace cppr
 		 * The buffered standard input Bufio_Trait
 		 */
 		Bufio_Trait* buf_stdin;
-
-		/**
-		 * The allocation count that's made using the global memory
-		 */
-		usize allocation_count = 0;
-		/**
-		 * The allocation size that's made using the global memory
-		 */
-		usize allocation_size = 0;
 		bool debug_configured = false;
 
 		API_CPPR ~OS();
 
-		/**
-		 * @brief      Allocates the given count of values from the global memory
-		 *
-		 * @param[in]  count      The count of values to allocate
-		 * @param[in]  alignment  The alignment of the values
-		 *
-		 * @tparam     T          The type of the values
-		 *
-		 * @return     An Owner pointer to the underlying memory block
-		 */
-		template<typename T>
-		Owner<T>
-		alloc(usize count = 1)
-		{
-			return global_memory->template alloc<T>(count);
-		}
+		///**
+		// * @brief      Allocates the given count of values from the global memory
+		// *
+		// * @param[in]  count      The count of values to allocate
+		// * @param[in]  alignment  The alignment of the values
+		// *
+		// * @tparam     T          The type of the values
+		// *
+		// * @return     An Owner pointer to the underlying memory block
+		// */
+		//template<typename T>
+		//Owner<T>
+		//alloc(usize count = 1)
+		//{
+		//	return global_memory->template alloc<T>(count);
+		//}
 
-		/**
-		 * @brief      Frees the underlying memory of the given owner pointer
-		 *
-		 * @param      value  The owner pointer to free
-		 *
-		 * @tparam     T      The Type of the values
-		 */
-		template<typename T>
-		void
-		free(Owner<T>& value)
-		{
-			return global_memory->template free<T>(value);
-		}
+		///**
+		// * @brief      Frees the underlying memory of the given owner pointer
+		// *
+		// * @param      value  The owner pointer to free
+		// *
+		// * @tparam     T      The Type of the values
+		// */
+		//template<typename T>
+		//void
+		//free(Owner<T>& value)
+		//{
+		//	return global_memory->template free<T>(value);
+		//}
 
-		/**
-		 * @brief      Frees the underlying memory of the given owner pointer
-		 *
-		 * @param      value  The owner pointer to free
-		 *
-		 * @tparam     T      The Type of the values
-		 */
-		template<typename T>
-		void
-		free(Owner<T>&& value)
-		{
-			return global_memory->template free<T>(value);
-		}
+		///**
+		// * @brief      Frees the underlying memory of the given owner pointer
+		// *
+		// * @param      value  The owner pointer to free
+		// *
+		// * @tparam     T      The Type of the values
+		// */
+		//template<typename T>
+		//void
+		//free(Owner<T>&& value)
+		//{
+		//	return global_memory->template free<T>(value);
+		//}
 
-		/**
-		 * @brief Allocates and invokes the constructor of the allocated elements
-		 * 
-		 * @tparam T Type of the values to allocate
-		 * @tparam TArgs Types of the values to be passed to the constructor
-		 * @param count The number of values to allocate
-		 * @param args The arguments that will be passed to the constructor
-		 * @return Owner<T> The result memory
-		 */
-		template<typename T, typename ... TArgs>
-		Owner<T>
-		construct(usize count, TArgs&& ... args)
-		{
-			Owner<T> result = alloc<T>(count);
-			for(usize i = 0; i < count; ++i)
-				::new (result.ptr + i) T(std::forward<TArgs>(args)...);
-			return result;
-		}
+		///**
+		// * @brief Allocates and invokes the constructor of the allocated elements
+		// * 
+		// * @tparam T Type of the values to allocate
+		// * @tparam TArgs Types of the values to be passed to the constructor
+		// * @param count The number of values to allocate
+		// * @param args The arguments that will be passed to the constructor
+		// * @return Owner<T> The result memory
+		// */
+		//template<typename T, typename ... TArgs>
+		//Owner<T>
+		//construct(usize count, TArgs&& ... args)
+		//{
+		//	Owner<T> result = alloc<T>(count);
+		//	for(usize i = 0; i < count; ++i)
+		//		::new (result.ptr + i) T(std::forward<TArgs>(args)...);
+		//	return result;
+		//}
 
-		/**
-		 * @brief Invokes the destructor of the values then frees the memory
-		 * 
-		 * @tparam T Type of the values in the memory
-		 * @param value Owner of the memory to be destructed
-		 */
-		template<typename T>
-		void
-		destruct(Owner<T>& value)
-		{
-			for(usize i = 0; i < value.count(); ++i)
-				value[i].~T();
-			free(value);
-		}
+		///**
+		// * @brief Invokes the destructor of the values then frees the memory
+		// * 
+		// * @tparam T Type of the values in the memory
+		// * @param value Owner of the memory to be destructed
+		// */
+		//template<typename T>
+		//void
+		//destruct(Owner<T>& value)
+		//{
+		//	for(usize i = 0; i < value.count(); ++i)
+		//		value[i].~T();
+		//	free(value);
+		//}
 
-		/**
-		 * @brief Invokes the destructor of the values then frees the memory
-		 * 
-		 * @tparam T Type of the values in the memory
-		 * @param value Owner of the memory to be destructed
-		 */
-		template<typename T>
-		void
-		destruct(Owner<T>&& value)
-		{
-			for(usize i = 0; i < value.count(); ++i)
-				value[i].~T();
-			free(std::move(value));
-		}
+		///**
+		// * @brief Invokes the destructor of the values then frees the memory
+		// * 
+		// * @tparam T Type of the values in the memory
+		// * @param value Owner of the memory to be destructed
+		// */
+		//template<typename T>
+		//void
+		//destruct(Owner<T>&& value)
+		//{
+		//	for(usize i = 0; i < value.count(); ++i)
+		//		value[i].~T();
+		//	free(std::move(value));
+		//}
 
 		API_CPPR void
-		_print_memory_report() const;
+		print_leak_report() const;
 
 		/**
 		 * @brief      Dumps a callstack in debug mode, does nothing in release mode.
 		 */
 		API_CPPR void
-		dump_callstack() const;
+		dump_callstack(IO_Trait* io = nullptr) const;
 
 		/**
 		 * @brief      Allocates memory from OS virtual memory
@@ -348,6 +342,55 @@ namespace cppr
 
 	API_CPPR Allocator_Trait*
 	allocator_pop();
+
+	template<typename T>
+	Owner<T>
+	alloc(usize count = 1)
+	{
+		return allocator()->template alloc<T>(count);
+	}
+
+	template<typename T>
+	void
+	free(Owner<T>& value)
+	{
+		return allocator()->template free<T>(value);
+	}
+
+	template<typename T>
+	void
+	free(Owner<T>&& value)
+	{
+		return allocator()->template free<T>(value);
+	}
+
+	template<typename T, typename ... TArgs>
+	Owner<T>
+	construct(usize count, TArgs&& ... args)
+	{
+		auto result = alloc<T>(count);
+		for(usize i = 0; i < count; ++i)
+			::new (result.ptr + i) T(std::forward<TArgs>(args)...);
+		return result;
+	}
+
+	template<typename T>
+	void
+	destruct(Owner<T>& value)
+	{
+		for(usize i = 0; i < value.count(); ++i)
+			value[i].~T();
+		free(value);
+	}
+
+	template<typename T>
+	void
+	destruct(Owner<T>&& value)
+	{
+		for(usize i = 0; i < value.count(); ++i)
+			value[i].~T();
+		free(value);
+	}
 
 	/**
 	 * A pointer to the singleton OS

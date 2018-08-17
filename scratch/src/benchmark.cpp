@@ -811,7 +811,7 @@ loom_debug()
 	u32 stack_size = KILOBYTES(32);
 	usize required_size = l.init(std::move(mem), workers_count, max_tasks,
 								 max_fibers, stack_size);
-	mem = os->template alloc<byte>(required_size);
+	mem = alloc<byte>(required_size);
 	println(required_size/(1024.0f*1024.0f), "Mb");
 	l.init(std::move(mem), workers_count, max_tasks, max_fibers, stack_size);
 
@@ -852,22 +852,27 @@ loom_debug()
 	cppr::printfmt("total: {}ms\n{}ns per routine\n", watch.milliseconds(), watch.nanoseconds() / (max_fibers));
 	println(x);
 	l.dispose();
-	os->free(l.memory);
+	free(l.memory);
 }
 
 void
 debug()
 {
-
+	allocator_push(os->leak_detector);
+	(alloc<byte>(1024));
+	(alloc<byte>(1022));
+	allocator_pop();
 }
 
 void
 do_benchmark()
 {
+	//allocator_push(os->leak_detector);
 	// while(true)
 	// {
 	// 	loom_debug();
 	// }
+	debug();
 	usize limit = 1000;
 
 	compare_benchmarks(
