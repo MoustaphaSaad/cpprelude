@@ -73,25 +73,26 @@ namespace cppr
 	}
 
 	void
-	OS::print_leak_report() const
+	OS::print_leak_report(IO_Trait* io) const
 	{
 		if(_leak_head)
 		{
+			if(io == nullptr) io = unbuf_stderr;
 			usize count = 0;
 			usize size = 0;
 			auto it = _leak_head;
 			while(it)
 			{
-				println_err("Leak size: ", it->size, ", call stack:");
+				vprints(io, "Leak size: ", it->size, ", call stack:\n");
 				if(it->call_stack.empty())
-					println_err("run in debug mode to get call stack info");
+					vprints(io, "run in debug mode to get call stack info\n");
 				else
-					println_err(it->call_stack.str_content());
+					vprints(io, it->call_stack.str_content(), "\n");
 				count++;
 				size += it->size;
 				it = it->next;
 			}
-			println_err("Leaks count: ", count, ", Leaks size(bytes): ", size);
+			vprints(io, "Leaks count: ", count, ", Leaks size(bytes): ", size, "\n");
 		}
 	}
 
